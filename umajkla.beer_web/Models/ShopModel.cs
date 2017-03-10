@@ -38,6 +38,16 @@ namespace umajkla.beer.Models
                     }
                 }
             }
+
+            public Customer(SqlDataReader reader)
+            {
+                Id = int.Parse(reader["id"].ToString());
+                Name = reader["name"].ToString();
+                Address = reader["address"].ToString();
+                Phone = reader["phone"].ToString();
+                Email = reader["email"].ToString();
+                Notes = reader["notes"].ToString();
+            }
         }
         public class Payment
         {
@@ -203,6 +213,76 @@ namespace umajkla.beer.Models
                 paymentId = (int)command.ExecuteScalar();
             }
             return GetTransactionDetail(paymentId);
+        }
+        #endregion
+        #region Customers Methods
+        public static List<Customer> GetCustomersList()
+        {
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("SELECT * FROM dbo.customers");
+
+                connection.Open();
+
+                SqlCommand command = new SqlCommand(cmdString, connection);
+
+                List<Customer> customers = new List<Customer>();
+
+                using (SqlDataReader list = command.ExecuteReader())
+                {
+                    while (list.Read())
+                    {
+                        Customer customer = new Customer(list);
+                        customers.Add(customer);
+                    }
+                }
+
+                return customers;
+            }
+        }
+
+        public static Customer GetCustomerDetail(int id)
+        {
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                SqlCommand command = new SqlCommand(string.Format("SELECT * FROM dbo.customers WHERE id='{0}'", id), connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                reader.Read();
+                return new Customer(reader);
+            }
+        }
+
+        public static Customer CreateCustomer (string details)
+        {
+            dynamic data = System.Web.Helpers.Json.Decode(details);
+            int customerId;
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("INSERT INTO dbo.customers (name, address, phone, email, notes) " +
+                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
+                data.Name, data.Address, data.Phone, data.Email, data.Notes);
+                connection.Open();
+                SqlCommand command = new SqlCommand(cmdString, connection);
+                customerId = (int)command.ExecuteScalar();
+            }
+            return GetCustomerDetail(customerId);
+        }
+
+        public static Customer UpdateCustomer (string details)
+        {
+            dynamic data = System.Web.Helpers.Json.Decode(details);
+            int customerId;
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("UPDATE dbo.customers SET " +
+                    "name='{0}', address='{1}', phone='{2}', email='{3}', notes='{4}', updated='{5}' OUTPUT INSERTED.ID WHERE id='{6}'",
+                    data.Name, data.Address, data.Phone, data.Email, data.Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), data.Id);
+                connection.Open();
+                SqlCommand command = new SqlCommand(cmdString, connection);
+                customerId = (int)command.ExecuteScalar();
+            }
+            return GetCustomerDetail(customerId);
         }
         #endregion
         #region Transaction Methods
