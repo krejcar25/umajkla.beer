@@ -64,6 +64,7 @@ namespace umajkla.beer.Models
 
     public class RegisterViewModel
     {
+
         [Required]
         [EmailAddress]
         [Display(Name = "E-mail")]

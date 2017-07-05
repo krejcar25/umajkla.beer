@@ -11,7 +11,7 @@ using umajkla.beer.Models.Shop;
 
 namespace umajkla.beer.Controllers
 {
-    public class CustomersController : ApiController
+    public class ItemsController : ApiController
     {
         // GET api/<controller>/5
         public HttpResponseMessage Get(string id)
@@ -21,7 +21,7 @@ namespace umajkla.beer.Controllers
             {
                 Guid eventId = Guid.Parse(id);
                 resp.StatusCode = HttpStatusCode.OK;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(new Customer().List(eventId)), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(new Item().List(eventId)), System.Text.Encoding.UTF8, "application/json");
                 return resp;
             }
             catch (FormatException)
@@ -36,17 +36,17 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Post([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Customer customer = new Customer(json);
-            Guid createdId = customer.Create();
+            Item item = new Item(json);
+            Guid createdId = item.Create();
             if (createdId == Guid.Empty)
             {
                 resp.StatusCode = HttpStatusCode.InternalServerError;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(customer.SQLResponse), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(item.SQLResponse), System.Text.Encoding.UTF8, "application/json");
             }
             else
             {
                 resp.StatusCode = HttpStatusCode.Created;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(new Customer(createdId)), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(new Item(createdId)), System.Text.Encoding.UTF8, "application/json");
             }
             return resp;
         }
@@ -55,17 +55,17 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Put([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Customer customer = new Customer(json);
-            Guid updatedId = customer.Update();
+            Item item = new Item(json);
+            Guid updatedId = item.Update();
             if (updatedId == Guid.Empty)
             {
                 resp.StatusCode = HttpStatusCode.InternalServerError;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(customer.SQLResponse), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(item.SQLResponse), System.Text.Encoding.UTF8, "application/json");
             }
             else
             {
                 resp.StatusCode = HttpStatusCode.OK;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(new Customer(updatedId)), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(new Item(updatedId)), System.Text.Encoding.UTF8, "application/json");
             }
             return resp;
         }
@@ -74,21 +74,21 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Delete(string id)
         {
             HttpResponseMessage resp = new HttpResponseMessage();
-            Guid customerId;
+            Guid itemId;
             try
             {
-                customerId = Guid.Parse(id);
+                itemId = Guid.Parse(id);
             }
             catch (FormatException)
             {
                 resp.StatusCode = HttpStatusCode.InternalServerError;
-                resp.Content = new StringContent("customer guid has incorrect format", System.Text.Encoding.UTF8, "text/plain");
+                resp.Content = new StringContent("item guid has incorrect format", System.Text.Encoding.UTF8, "text/plain");
                 return resp;
             }
 
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                SqlCommand command = new SqlCommand(string.Format("DELETE FROM dbo.customers WHERE customerId='{0}'", customerId), connection);
+                SqlCommand command = new SqlCommand(string.Format("DELETE FROM dbo.items WHERE itemId='{0}'", itemId), connection);
                 connection.Open();
                 if (command.ExecuteNonQuery() == 1)
                 {
@@ -98,7 +98,7 @@ namespace umajkla.beer.Controllers
                 else
                 {
                     resp.StatusCode = HttpStatusCode.NotFound;
-                    resp.Content = new StringContent("customer could not be found", System.Text.Encoding.UTF8, "text/plain");
+                    resp.Content = new StringContent("item could not be found", System.Text.Encoding.UTF8, "text/plain");
                 }
             }
             return resp;

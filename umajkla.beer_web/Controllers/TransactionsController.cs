@@ -8,69 +8,90 @@ using System.Data.SqlClient;
 using System.Web.Configuration;
 using Newtonsoft.Json;
 using System.Web.Helpers;
+using umajkla.beer.Models.Shop;
 
 namespace umajkla.beer.Controllers
 {
     public class TransactionsController : ApiController
     {
         // GET api/<controller>/5
-        public HttpResponseMessage Get(string task, int id = 0)
+        public HttpResponseMessage Get(string idRaw)
         {
             var resp = new HttpResponseMessage();
-            if (task == "list")
+            string[] id = idRaw.Split(new char[]{ ':'});
+            try
             {
+                Guid guid = Guid.Parse(id[1]);
                 resp.StatusCode = HttpStatusCode.OK;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(Models.ShopModel.GetTransactionsList()), System.Text.Encoding.UTF8, "application/json");
+                if (id[0] == "customer") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByCustomer(guid)), System.Text.Encoding.UTF8, "application/json");
+                if (id[0] == "item") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByItem(guid)), System.Text.Encoding.UTF8, "application/json");
+                return resp;
             }
-            else if (task == "show")
+            catch (FormatException)
             {
-                if (id==0)
-                {
-                    resp.StatusCode = HttpStatusCode.Ambiguous;
-                    resp.Content = new StringContent("information missing", System.Text.Encoding.UTF8, "text/plain");
-                }
-                else
-                {
-                    resp.StatusCode = HttpStatusCode.OK;
-                    resp.Content = new StringContent(JsonConvert.SerializeObject(Models.ShopModel.GetTransactionDetail(id)), System.Text.Encoding.UTF8, "application/json");
-                }
-            } else
-            {
-                resp.StatusCode = HttpStatusCode.NotImplemented;
-                resp.Content = new StringContent("requested feature could not be understood", System.Text.Encoding.UTF8, "text/plain");
+                resp.StatusCode = HttpStatusCode.InternalServerError;
+                resp.Content = new StringContent("customer/item guid has incorrect format", System.Text.Encoding.UTF8, "application/json");
+                return resp;
             }
-            return resp;
         }
 
         // POST api/<controller>
-        public HttpResponseMessage Post([FromBody]string details)
+        public HttpResponseMessage Post([FromBody]string json)
         {
-            var resp = new HttpResponseMessage()
+            var resp = new HttpResponseMessage();
+            Transaction transaction = new Transaction(json);
+            Guid createdId = transaction.Create();
+            if (createdId == Guid.Empty)
             {
-                StatusCode = HttpStatusCode.Created,
-                Content = new StringContent(JsonConvert.SerializeObject(Models.ShopModel.CreateTransaction(details)), System.Text.Encoding.UTF8, "application/json")
-            };
+                resp.StatusCode = HttpStatusCode.InternalServerError;
+                resp.Content = new StringContent(JsonConvert.SerializeObject(transaction.SQLResponse), System.Text.Encoding.UTF8, "application/json");
+            }
+            else
+            {
+                resp.StatusCode = HttpStatusCode.Created;
+                resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction(createdId)), System.Text.Encoding.UTF8, "application/json");
+            }
             return resp;
         }
 
         // PUT api/<controller>/5
-        public HttpResponseMessage Put([FromBody]string details)
+        public HttpResponseMessage Put([FromBody]string json)
         {
-            var resp = new HttpResponseMessage()
+            var resp = new HttpResponseMessage();
+            Transaction transaction = new Transaction(json);
+            Guid updatedId = transaction.Update();
+            if (updatedId == Guid.Empty)
             {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonConvert.SerializeObject(Models.ShopModel.UpdateTransaction(details)), System.Text.Encoding.UTF8, "application/json")
-            };
+                resp.StatusCode = HttpStatusCode.InternalServerError;
+                resp.Content = new StringContent(JsonConvert.SerializeObject(transaction.SQLResponse), System.Text.Encoding.UTF8, "application/json");
+            }
+            else
+            {
+                resp.StatusCode = HttpStatusCode.OK;
+                resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction(updatedId)), System.Text.Encoding.UTF8, "application/json");
+            }
             return resp;
         }
 
         // DELETE api/<controller>/5
-        public HttpResponseMessage Delete(string task)
+        public HttpResponseMessage Delete(string id)
         {
             HttpResponseMessage resp = new HttpResponseMessage();
+            Guid transactionId;
+            try
+            {
+                transactionId = Guid.Parse(id);
+            }
+            catch (FormatException)
+            {
+                resp.StatusCode = HttpStatusCode.InternalServerError;
+                resp.Content = new StringContent("transaction guid has incorrect format", System.Text.Encoding.UTF8, "text/plain");
+                return resp;
+            }
+
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                SqlCommand command = new SqlCommand(string.Format("DELETE FROM dbo.transactions WHERE id='{0}'", task), connection);
+                SqlCommand command = new SqlCommand(string.Format("DELETE FROM dbo.transactions WHERE transactionId='{0}'", transactionId), connection);
                 connection.Open();
                 if (command.ExecuteNonQuery() == 1)
                 {
