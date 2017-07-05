@@ -50,7 +50,7 @@ namespace umajkla.beer.Models.Shop
             }
         }
 
-        public Location(string dataJson)
+        /*public Location(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -66,7 +66,7 @@ namespace umajkla.beer.Models.Shop
             if (!string.IsNullOrEmpty(data.Created.ToString())) Created = DateTime.Parse(data.Created.ToString());
             if (!string.IsNullOrEmpty(data.Updated.ToString())) Updated = DateTime.Parse(data.Updated.ToString());
             CreatedBy = data.CreatedBy.ToString();
-        }
+        }*/
 
         public Location()
         {
@@ -97,17 +97,17 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.locations (street1, street2, city, postcode, countrycode, latitude, longitude) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
-                Street1, Street2, City, Postcode, CountryCode, Latitude, Longitude);
+                string cmdString = string.Format(CultureInfo.GetCultureInfo("en-US"), "INSERT INTO dbo.locations (street1, street2, city, postcode, countrycode, latitude, longitude, name) " +
+                "OUTPUT INSERTED.LOCATIONID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5:0.0000000000}', '{6:0.0000000000}', '{7}')",
+                Street1, Street2, City, Postcode, CountryCode, Latitude, Longitude, Name);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }
@@ -118,17 +118,17 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("UPDATE dbo.locations SET street1 = {0}, street2 = {1}, city = {2}, postcode = {3}, countrycode = {4}, updated = {5}, latitude = {6}, longitude = {7}" +
-                    "OUTPUT INSERTED.ID WHERE locationId = '{8}'",
-                    Street1, Street2, City, Postcode, CountryCode, Latitude, Longitude, LocationId);
+                string cmdString = string.Format("UPDATE dbo.locations SET street1 = '{0}', street2 = '{1}', city = '{2}', postcode = '{3}', countrycode = '{4}', updated = '{5}', latitude = '{6}', longitude = '{7}', name = '{8}'" +
+                    "OUTPUT INSERTED.LOCATIONID WHERE locationId='{9}'",
+                    Street1, Street2, City, Postcode, CountryCode, DateTime.Now, Latitude, Longitude, Name, LocationId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

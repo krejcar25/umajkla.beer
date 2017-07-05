@@ -15,16 +15,16 @@ namespace umajkla.beer.Controllers
     public class TransactionsController : ApiController
     {
         // GET api/<controller>/5
-        public HttpResponseMessage Get(string idRaw)
+        public HttpResponseMessage Get(string id)
         {
             var resp = new HttpResponseMessage();
-            string[] id = idRaw.Split(new char[]{ ':'});
+            string[] idExp = id.Split(new char[]{ '='});
             try
             {
-                Guid guid = Guid.Parse(id[1]);
+                Guid guid = Guid.Parse(idExp[1]);
                 resp.StatusCode = HttpStatusCode.OK;
-                if (id[0] == "customer") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByCustomer(guid)), System.Text.Encoding.UTF8, "application/json");
-                if (id[0] == "item") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByItem(guid)), System.Text.Encoding.UTF8, "application/json");
+                if (idExp[0] == "customer") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByCustomer(guid)), System.Text.Encoding.UTF8, "application/json");
+                if (idExp[0] == "item") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByItem(guid)), System.Text.Encoding.UTF8, "application/json");
                 return resp;
             }
             catch (FormatException)
@@ -39,7 +39,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Post([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Transaction transaction = new Transaction(json);
+            Transaction transaction = JsonConvert.DeserializeObject<Transaction>(json);
             Guid createdId = transaction.Create();
             if (createdId == Guid.Empty)
             {
@@ -58,7 +58,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Put([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Transaction transaction = new Transaction(json);
+            Transaction transaction = JsonConvert.DeserializeObject<Transaction>(json);
             Guid updatedId = transaction.Update();
             if (updatedId == Guid.Empty)
             {

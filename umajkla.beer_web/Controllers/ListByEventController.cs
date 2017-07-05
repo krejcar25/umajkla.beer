@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -25,7 +26,7 @@ namespace umajkla.beer.Controllers
             }
             catch (FormatException)
             {
-                return Json("event guid has incorrect format");
+                return Json("event guid has incorrect format", JsonRequestBehavior.AllowGet);
             }
 
             List<Customer> customers = new Customer().List(eventId);
@@ -35,8 +36,8 @@ namespace umajkla.beer.Controllers
                 List<Payment> partial = new Payment().List(customer.CustomerId);
                 payments.AddRange(partial);
             }
-
-            return Json(payments);
+            string json = JsonConvert.SerializeObject(payments);
+            return Content(json, "application/json");
         }
 
         public ActionResult Transactions(string id)
@@ -49,7 +50,7 @@ namespace umajkla.beer.Controllers
             }
             catch (FormatException)
             {
-                return Json("event guid has incorrect format");
+                return Json("event guid has incorrect format", JsonRequestBehavior.AllowGet);
             }
 
             List<Customer> customers = new Customer().List(eventId);
@@ -59,8 +60,8 @@ namespace umajkla.beer.Controllers
                 List<Transaction> partial = new Transaction().ListByCustomer(customer.CustomerId);
                 transactions.AddRange(partial);
             }
-
-            return Json(transactions);
+            string json = JsonConvert.SerializeObject(transactions);
+            return Content(json, "application/json");
         }
 
         public ActionResult Supplies(string id)
@@ -73,18 +74,18 @@ namespace umajkla.beer.Controllers
             }
             catch (FormatException)
             {
-                return Json("item guid has incorrect format");
+                return Json("item guid has incorrect format", JsonRequestBehavior.AllowGet);
             }
 
             List<Item> items = new Item().List(itemId);
-            List<Supply> payments = new List<Supply>();
+            List<Supply> supplies = new List<Supply>();
             foreach (Item item in items)
             {
                 List<Supply> partial = new Supply().List(item.ItemId);
-                payments.AddRange(partial);
+                supplies.AddRange(partial);
             }
-
-            return Json(payments);
+            string json = JsonConvert.SerializeObject(supplies);
+            return Content(json, "application/json");
         }
     }
 }

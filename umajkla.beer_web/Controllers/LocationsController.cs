@@ -25,12 +25,12 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Post([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Supply customer = new Supply(json);
-            Guid createdId = customer.Create();
+            Location location = JsonConvert.DeserializeObject<Location>(json);
+            Guid createdId = location.Create();
             if (createdId == Guid.Empty)
             {
                 resp.StatusCode = HttpStatusCode.InternalServerError;
-                resp.Content = new StringContent(JsonConvert.SerializeObject(customer.SQLResponse), System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent(JsonConvert.SerializeObject(location.SQLResponse), System.Text.Encoding.UTF8, "application/json");
             }
             else
             {
@@ -44,7 +44,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Put([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Location location = new Location(json);
+            Location location = JsonConvert.DeserializeObject<Location>(json);
             Guid updatedId = location.Update();
             if (updatedId == Guid.Empty)
             {

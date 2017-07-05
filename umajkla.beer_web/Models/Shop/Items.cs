@@ -37,12 +37,13 @@ namespace umajkla.beer.Models.Shop
                     Created = DateTime.Parse(reader["created"].ToString());
                     Updated = DateTime.Parse(reader["updated"].ToString());
                     Notes = reader["notes"].ToString();
+                    EventId = Guid.Parse(reader["eventId"].ToString());
                     CreatedBy = reader["createdBy"].ToString();
                 }
             }
         }
 
-        public Item(string dataJson)
+        /*public Item(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -52,9 +53,9 @@ namespace umajkla.beer.Models.Shop
             Unit = data.Unit.ToString();
             if (!string.IsNullOrEmpty(data.Created.ToString())) Created = DateTime.Parse(data.Created.ToString());
             if (!string.IsNullOrEmpty(data.Updated.ToString())) Updated = DateTime.Parse(data.Updated.ToString());
-            Notes = data.Notes.ToString();
+            if (!string.IsNullOrEmpty(data.Notes.ToString())) Notes = data.Notes.ToString();
             CreatedBy = data.CreatedBy.ToString();
-        }
+        }*/
 
         public Item()
         {
@@ -85,17 +86,17 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.goods (name, price, unit, notes, eventId) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}, {4}')",
+                string cmdString = string.Format("INSERT INTO dbo.items (name, price, unit, notes, eventId) " +
+                "OUTPUT INSERTED.ITEMID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
                 Name, Price, Unit, Notes, EventId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }
@@ -106,17 +107,17 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("UPDATE dbo.goods SET " +
-                    "name='{0}', price='{1}', unit='{2}', notes='{3}', updated='{4}', eventId='{5}' OUTPUT INSERTED.ID WHERE id='{6}'",
+                string cmdString = string.Format("UPDATE dbo.items SET " +
+                    "name='{0}', price='{1}', unit='{2}', notes='{3}', updated='{4}', eventId='{5}' OUTPUT INSERTED.ITEMID WHERE itemId='{6}'",
                     Name, Price, Unit, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId, ItemId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

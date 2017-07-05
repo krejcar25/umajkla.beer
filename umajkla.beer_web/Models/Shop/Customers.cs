@@ -39,13 +39,13 @@ namespace umajkla.beer.Models.Shop
                     Notes = reader["notes"].ToString();
                     Created = DateTime.Parse(reader["created"].ToString());
                     Updated = DateTime.Parse(reader["updated"].ToString());
-                    EventId = Guid.Parse(reader["updated"].ToString());
+                    EventId = Guid.Parse(reader["eventId"].ToString());
                     CreatedBy = reader["createdBy"].ToString();
                 }
             }
         }
 
-        public Customer(string dataJson)
+        /*public Customer(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -59,7 +59,7 @@ namespace umajkla.beer.Models.Shop
             if (!string.IsNullOrEmpty(data.Updated.ToString())) Updated = DateTime.Parse(data.Updated.ToString());
             EventId = Guid.Parse(data.EventId.ToString());
             CreatedBy = data.CreatedBy.ToString();
-        }
+        }*/
 
         public Customer()
         {
@@ -92,16 +92,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("INSERT INTO dbo.customers (name, address, phone, email, notes, eventId) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}, {5}')",
+                "OUTPUT INSERTED.CUSTOMERID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
                 Name, Address, Phone, Email, Notes, EventId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }
@@ -113,16 +113,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("UPDATE dbo.customers SET " +
-                    "name='{0}', address='{1}', phone='{2}', email='{3}', notes='{4}', updated='{5}', eventId='{6}' OUTPUT INSERTED.ID WHERE customerId='{7}'",
+                    "name='{0}', address='{1}', phone='{2}', email='{3}', notes='{4}', updated='{5}', eventId='{6}' OUTPUT INSERTED.CUSTOMERID WHERE customerId='{7}'",
                     Name, Address, Phone, Email, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId, CustomerId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

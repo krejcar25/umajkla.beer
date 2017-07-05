@@ -36,7 +36,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Post([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Payment payment = new Payment(json);
+            Payment payment = JsonConvert.DeserializeObject<Payment>(json);
             Guid createdId = payment.Create();
             if (createdId == Guid.Empty)
             {
@@ -55,7 +55,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Put([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Payment payment = new Payment(json);
+            Payment payment = JsonConvert.DeserializeObject<Payment>(json);
             Guid updatedId = payment.Update();
             if (updatedId == Guid.Empty)
             {

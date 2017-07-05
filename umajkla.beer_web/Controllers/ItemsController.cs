@@ -36,7 +36,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Post([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Item item = new Item(json);
+            Item item = JsonConvert.DeserializeObject<Item>(json);
             Guid createdId = item.Create();
             if (createdId == Guid.Empty)
             {
@@ -55,7 +55,7 @@ namespace umajkla.beer.Controllers
         public HttpResponseMessage Put([FromBody]string json)
         {
             var resp = new HttpResponseMessage();
-            Item item = new Item(json);
+            Item item = JsonConvert.DeserializeObject<Item>(json);
             Guid updatedId = item.Update();
             if (updatedId == Guid.Empty)
             {

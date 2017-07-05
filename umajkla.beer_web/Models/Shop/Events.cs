@@ -43,7 +43,7 @@ namespace umajkla.beer.Models.Shop
             }
         }
 
-        public Event(string dataJson)
+        /*public Event(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -56,7 +56,7 @@ namespace umajkla.beer.Models.Shop
             Description = data.Description.ToString();
             Created = DateTime.Parse(data.Created.ToString());
             Updated = DateTime.Parse(data.Updated.ToString());
-        }
+        }*/
 
         public Event()
         {
@@ -89,16 +89,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("INSERT INTO dbo.events (name, dateFrom, dateTo, description, locationId) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
-                Name, DateFrom, DateTo, Description, LocationId);
+                "OUTPUT INSERTED.EVENTID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
+                Name, DateFrom.ToString("yyyy-MM-dd HH:mm:ss"), DateTo.ToString("yyyy-MM-dd HH:mm:ss"), Description, LocationId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception ex)
                 {
                     return Guid.Empty;
                 }
@@ -110,16 +110,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("UPDATE dbo.events SET " +
-                    "name='{0}', dateFrom='{1}', dateTo='{2}', description='{3}', locationId='{4}', updated='{5}' OUTPUT INSERTED.ID WHERE eventId='{6}'",
-                    Name, DateFrom, DateTo, Description, LocationId, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId);
+                    "name='{0}', dateFrom='{1}', dateTo='{2}', description='{3}', locationId='{4}', updated='{5}' OUTPUT INSERTED.EVENTID WHERE eventId='{6}'",
+                    Name, DateFrom.ToString("yyyy-MM-dd HH:mm:ss"), DateTo.ToString("yyyy-MM-dd HH:mm:ss"), Description, LocationId, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

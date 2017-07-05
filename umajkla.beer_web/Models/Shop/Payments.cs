@@ -27,6 +27,8 @@ namespace umajkla.beer.Models.Shop
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
+                    reader.Read();
+
                     PaymentId = Guid.Parse(reader["paymentId"].ToString());
                     Amount = int.Parse(reader["amount"].ToString());
                     CustomerId = Guid.Parse(reader["customerId"].ToString());
@@ -38,7 +40,7 @@ namespace umajkla.beer.Models.Shop
             }
         }
 
-        public Payment(string dataJson)
+        /*public Payment(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -49,7 +51,7 @@ namespace umajkla.beer.Models.Shop
             ProcessedBy = data.ProcessedBy.ToString();
             if (!string.IsNullOrEmpty(data.Updated.ToString())) Updated = DateTime.Parse(data.Updated.ToString());
             if (!string.IsNullOrEmpty(data.Created.ToString())) Created = DateTime.Parse(data.Created.ToString());
-        }
+        }*/
 
         public Payment()
         {
@@ -82,16 +84,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("INSERT INTO dbo.payments (customerId, amount, notes) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}')",
+                "OUTPUT INSERTED.PAYMENTID VALUES ('{0}', '{1}', '{2}')",
                 CustomerId, Amount, Notes);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }
@@ -103,16 +105,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("UPDATE dbo.payments SET " +
-                    "customerId='{0}', amount='{1}', notes='{2}', updated='{3}' OUTPUT INSERTED.ID WHERE id='{4}'",
-                    CustomerId, Amount, Notes, DateTime.Now, PaymentId);
+                    "customerId='{0}', amount='{1}', notes='{2}', updated='{3}' OUTPUT INSERTED.PAYMENTID WHERE paymentId='{4}'",
+                    CustomerId, Amount, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), PaymentId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

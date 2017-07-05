@@ -29,6 +29,8 @@ namespace umajkla.beer.Models.Shop
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
+                    reader.Read();
+
                     TransactionId = Guid.Parse(reader["transactionId"].ToString());
                     CustomerId = Guid.Parse(reader["customerId"].ToString());
                     ItemId = Guid.Parse(reader["itemId"].ToString());
@@ -42,7 +44,7 @@ namespace umajkla.beer.Models.Shop
             }
         }
 
-        public Transaction(string dataJson)
+        /*public Transaction(string dataJson)
         {
             dynamic data = System.Web.Helpers.Json.Decode(dataJson);
 
@@ -55,7 +57,7 @@ namespace umajkla.beer.Models.Shop
             if (!string.IsNullOrEmpty(data.Updated.ToString())) Updated = DateTime.Parse(data.Updated.ToString());
             Notes = data.Notes.ToString();
             ProcessedBy = data.ProcessedBy.ToString();
-        }
+        }*/
 
         public Transaction()
         {
@@ -95,7 +97,9 @@ namespace umajkla.beer.Models.Shop
                 {
                     while (list.Read())
                     {
-                        Transaction transaction = new Transaction(Guid.Parse(list["transactionId"].ToString()));
+                        string idString = list["transactionId"].ToString();
+                        Guid id = Guid.Parse(idString);
+                        Transaction transaction = new Transaction(id);
                         transactions.Add(transaction);
                     }
                 }
@@ -109,16 +113,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("INSERT INTO dbo.transactions (customerId, itemId, amount, multiplier, notes) " +
-                "OUTPUT INSERTED.ID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
+                "OUTPUT INSERTED.TRANSACTIONID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
                 CustomerId, ItemId, Amount, Multiplier, Notes);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }
@@ -130,16 +134,16 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("UPDATE dbo.transactions SET " +
-                    "customerId='{0}', itemId='{1}', amount='{2}', multiplier='{3}', notes='{4}', updated='{5}' OUTPUT INSERTED.ID WHERE id='{6}'",
+                    "customerId='{0}', itemId='{1}', amount='{2}', multiplier='{3}', notes='{4}', updated='{5}' OUTPUT INSERTED.TRANSACTIONID WHERE transactionId='{6}'",
                     CustomerId, ItemId, Amount, Multiplier, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), TransactionId);
                 connection.Open();
-                SqlCommand command = new SqlCommand(cmdString, connection);
-                SQLResponse = command.ExecuteScalar().ToString();
                 try
                 {
+                    SqlCommand command = new SqlCommand(cmdString, connection);
+                    SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (FormatException)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

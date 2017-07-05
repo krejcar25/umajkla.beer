@@ -1,6 +1,6 @@
 ﻿USE [umajkla-evid]
 GO
-/****** Object:  Table [dbo].[APIkeys]    Script Date: 05.07.2017 10:46:16 dop. ******/
+/****** Object:  Table [dbo].[APIkeys]    Script Date: 05.07.2017 4:28:09 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,7 +17,7 @@ CREATE TABLE [dbo].[APIkeys](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[AspNetUsers]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[AspNetUsers]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[AspNetUsers](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[customers]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[customers]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -65,7 +65,7 @@ CREATE TABLE [dbo].[customers](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[eventPermissions]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[eventPermissions]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -87,7 +87,7 @@ CREATE TABLE [dbo].[eventPermissions](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[events]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[events]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -109,7 +109,7 @@ CREATE TABLE [dbo].[events](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[items]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[items]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -131,7 +131,7 @@ CREATE TABLE [dbo].[items](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[locations]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[locations]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -146,8 +146,9 @@ CREATE TABLE [dbo].[locations](
 	[createdBy] [nvarchar](128) NULL,
 	[created] [datetime] NOT NULL,
 	[updated] [datetime] NOT NULL,
-	[latitude] [decimal](20, 15) NOT NULL,
-	[longitude] [decimal](20, 15) NOT NULL,
+	[name] [nvarchar](max) NOT NULL,
+	[latitude] [numeric](20, 15) NOT NULL,
+	[longitude] [numeric](20, 15) NOT NULL,
  CONSTRAINT [PK_locations] PRIMARY KEY CLUSTERED 
 (
 	[locationId] ASC
@@ -155,7 +156,7 @@ CREATE TABLE [dbo].[locations](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[payments]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[payments]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -175,7 +176,7 @@ CREATE TABLE [dbo].[payments](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[supplies]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[supplies]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -196,7 +197,7 @@ CREATE TABLE [dbo].[supplies](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[transactions]    Script Date: 05.07.2017 10:46:17 dop. ******/
+/****** Object:  Table [dbo].[transactions]    Script Date: 05.07.2017 4:28:10 odp. ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -260,6 +261,8 @@ ALTER TABLE [dbo].[locations] ADD  CONSTRAINT [DF_locations_created]  DEFAULT (g
 GO
 ALTER TABLE [dbo].[locations] ADD  CONSTRAINT [DF_locations_updated]  DEFAULT (getdate()) FOR [updated]
 GO
+ALTER TABLE [dbo].[locations] ADD  CONSTRAINT [DF_locations_name]  DEFAULT ('placeholdername') FOR [name]
+GO
 ALTER TABLE [dbo].[locations] ADD  CONSTRAINT [DF_locations_latitude]  DEFAULT ((0)) FOR [latitude]
 GO
 ALTER TABLE [dbo].[locations] ADD  CONSTRAINT [DF_locations_longitude]  DEFAULT ((0)) FOR [longitude]
@@ -271,6 +274,10 @@ GO
 ALTER TABLE [dbo].[payments] ADD  CONSTRAINT [DF_payments_created]  DEFAULT (getdate()) FOR [created]
 GO
 ALTER TABLE [dbo].[supplies] ADD  CONSTRAINT [DF_supplies_supplyId]  DEFAULT (newid()) FOR [supplyId]
+GO
+ALTER TABLE [dbo].[supplies] ADD  CONSTRAINT [DF_supplies_created]  DEFAULT (getdate()) FOR [created]
+GO
+ALTER TABLE [dbo].[supplies] ADD  CONSTRAINT [DF_supplies_updated]  DEFAULT (getdate()) FOR [updated]
 GO
 ALTER TABLE [dbo].[transactions] ADD  CONSTRAINT [DF_transactions_transactionId]  DEFAULT (newid()) FOR [transactionId]
 GO
