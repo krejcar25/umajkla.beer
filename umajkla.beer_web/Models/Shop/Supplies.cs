@@ -18,6 +18,7 @@ namespace umajkla.beer.Models.Shop
         public string Notes { get; set; }
         public string ProcessedBy { get; set; }
         public string SQLResponse { get; set; }
+        public Guid EventId { get; set; }
 
         public Supply(Guid supplyId)
         {
@@ -38,6 +39,7 @@ namespace umajkla.beer.Models.Shop
                     Updated = DateTime.Parse(reader["updated"].ToString());
                     Notes = reader["notes"].ToString();
                     ProcessedBy = reader["processedBy"].ToString();
+                    EventId = Guid.Parse(reader["eventId"].ToString());
                 }
             }
         }
@@ -61,11 +63,32 @@ namespace umajkla.beer.Models.Shop
 
         }
 
-        public List<Supply> List(Guid itemId)
+        public List<Supply> ListByItem(Guid itemId)
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT supplyId FROM dbo.supplies WHERE itemId='{0}'", itemId);
+                string cmdString = string.Format("SELECT supplyId FROM dbo.supplies WHERE itemId='{0}' ORDER BY Created DESC", itemId);
+                connection.Open();
+                SqlCommand command = new SqlCommand(cmdString, connection);
+                List<Supply> supplies = new List<Supply>();
+                using (SqlDataReader list = command.ExecuteReader())
+                {
+                    while (list.Read())
+                    {
+                        Supply transaction = new Supply(Guid.Parse(list["supplyId"].ToString()));
+                        supplies.Add(transaction);
+                    }
+                }
+
+                return supplies;
+            }
+        }
+
+        public List<Supply> ListByEvent(Guid eventId)
+        {
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("SELECT supplyId FROM dbo.supplies WHERE eventId='{0}' ORDER BY Created DESC", eventId);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 List<Supply> supplies = new List<Supply>();
@@ -86,9 +109,9 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.supplies (itemId, amount, price, notes) " +
-                "OUTPUT INSERTED.SUPPLYID VALUES ('{0}', '{1}', '{2}', '{3}')",
-                ItemId, Amount, Price, Notes);
+                string cmdString = string.Format("INSERT INTO dbo.supplies (itemId, amount, price, notes, eventId) " +
+                "OUTPUT INSERTED.SUPPLYID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
+                ItemId, Amount, Price, Notes, EventId);
                 connection.Open();
                 try
                 {

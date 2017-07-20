@@ -17,6 +17,7 @@ namespace umajkla.beer.Models.Shop
         public DateTime Updated { get; set; }
         public DateTime Created { get; set; }
         public string SQLResponse { get; set; }
+        public Guid EventId { get; set; }
 
         public Payment(Guid paymentId)
         {
@@ -36,6 +37,7 @@ namespace umajkla.beer.Models.Shop
                     ProcessedBy = reader["processedBy"].ToString();
                     Updated = DateTime.Parse(reader["updated"].ToString());
                     Created = DateTime.Parse(reader["created"].ToString());
+                    EventId = Guid.Parse(reader["eventId"].ToString());
                 }
             }
         }
@@ -58,11 +60,32 @@ namespace umajkla.beer.Models.Shop
 
         }
 
-        public List<Payment> List(Guid customerId)
+        public List<Payment> ListByCustomer(Guid customerId)
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT paymentId FROM dbo.payments WHERE customerId='{0}'", customerId);
+                string cmdString = string.Format("SELECT paymentId FROM dbo.payments WHERE customerId='{0}' ORDER BY Created DESC", customerId);
+                connection.Open();
+                SqlCommand command = new SqlCommand(cmdString, connection);
+                List<Payment> payments = new List<Payment>();
+                using (SqlDataReader list = command.ExecuteReader())
+                {
+                    while (list.Read())
+                    {
+                        Payment payment = new Payment(Guid.Parse(list["paymentId"].ToString()));
+                        payments.Add(payment);
+                    }
+                }
+
+                return payments;
+            }
+        }
+
+        public List<Payment> ListByEvent(Guid eventId)
+        {
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("SELECT paymentId FROM dbo.payments WHERE eventId='{0}' ORDER BY Created DESC", eventId);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 List<Payment> payments = new List<Payment>();
@@ -83,9 +106,9 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.payments (customerId, amount, notes) " +
-                "OUTPUT INSERTED.PAYMENTID VALUES ('{0}', '{1}', '{2}')",
-                CustomerId, Amount, Notes);
+                string cmdString = string.Format("INSERT INTO dbo.payments (customerId, amount, notes, eventId) " +
+                "OUTPUT INSERTED.PAYMENTID VALUES ('{0}', '{1}', '{2}', '{3}')",
+                CustomerId, Amount, Notes, EventId);
                 connection.Open();
                 try
                 {

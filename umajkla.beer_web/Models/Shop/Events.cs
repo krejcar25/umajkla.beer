@@ -34,7 +34,8 @@ namespace umajkla.beer.Models.Shop
                     Name = reader["name"].ToString();
                     DateFrom = DateTime.Parse(reader["dateFrom"].ToString());
                     DateTo = DateTime.Parse(reader["dateTo"].ToString());
-                    LocationId = Guid.Parse(reader["locationId"].ToString());
+                    string locationId = reader["locationId"].ToString();
+                    LocationId = Guid.Parse(locationId);
                     CreatedBy = reader["createdBy"].ToString();
                     Description = reader["description"].ToString();
                     Created = DateTime.Parse(reader["created"].ToString());
@@ -98,7 +99,7 @@ namespace umajkla.beer.Models.Shop
                     SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return Guid.Empty;
                 }

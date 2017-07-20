@@ -1,0 +1,108 @@
+﻿<Page x:Class="umajkla.beer_win.Payments.Keypad"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:umajkla.beer_win.Payments"
+      mc:Ignorable="d" 
+      d:DesignHeight="711" d:DesignWidth="1050"
+      Title="Keypad">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="120"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="2" Grid.Row="5" Tag="0" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="0"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="3" Grid.Row="5" Tag="00" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="00"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="4" Grid.Row="5" Tag="c" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="⌫"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="2" Grid.Row="4" Tag="1" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="1"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="3" Grid.Row="4" Tag="2" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="2"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="4" Grid.Row="4" Tag="3" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="3"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="2" Grid.Row="3" Tag="4" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="4"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="3" Grid.Row="3" Tag="5" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="5"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="4" Grid.Row="3" Tag="6" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="6"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="2" Grid.Row="2" Tag="7" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="7"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="3" Grid.Row="2" Tag="8" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="8"/>
+            </Viewbox>
+        </Button>
+        <Button Grid.Column="4" Grid.Row="2" Tag="9" Click="digit_Click">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="9"/>
+            </Viewbox>
+        </Button>
+        <Viewbox Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="3">
+            <TextBlock x:Name="display" TextWrapping="Wrap" Text=""/>
+        </Viewbox>
+        <Viewbox HorizontalAlignment="Left" Margin="10,10,0,10" Grid.RowSpan="5" Width="90" Grid.Row="1">
+            <TextBlock x:Name="label">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="270"/>
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+        </Viewbox>
+        <Button Grid.Column="5" Grid.Row="4" Tag="enter" Click="digit_Click" Grid.RowSpan="2">
+            <Viewbox Stretch="Uniform">
+                <TextBlock Text="↵"/>
+            </Viewbox>
+        </Button>
+
+    </Grid>
+
+</Page>

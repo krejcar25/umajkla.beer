@@ -25,12 +25,13 @@ namespace umajkla.beer.Controllers
                 resp.StatusCode = HttpStatusCode.OK;
                 if (idExp[0] == "customer") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByCustomer(guid)), System.Text.Encoding.UTF8, "application/json");
                 if (idExp[0] == "item") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByItem(guid)), System.Text.Encoding.UTF8, "application/json");
+                if (idExp[0] == "event") resp.Content = new StringContent(JsonConvert.SerializeObject(new Transaction().ListByEvent(guid)), System.Text.Encoding.UTF8, "application/json");
                 return resp;
             }
             catch (FormatException)
             {
                 resp.StatusCode = HttpStatusCode.InternalServerError;
-                resp.Content = new StringContent("customer/item guid has incorrect format", System.Text.Encoding.UTF8, "application/json");
+                resp.Content = new StringContent("customer/item/event guid has incorrect format", System.Text.Encoding.UTF8, "application/json");
                 return resp;
             }
         }

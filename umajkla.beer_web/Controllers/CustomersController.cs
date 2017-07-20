@@ -26,7 +26,6 @@ namespace umajkla.beer.Controllers
             }
             catch (FormatException)
             {
-                throw;
                 resp.StatusCode = HttpStatusCode.InternalServerError;
                 resp.Content = new StringContent("event guid has incorrect format", System.Text.Encoding.UTF8, "application/json");
                 return resp;

@@ -19,6 +19,7 @@ namespace umajkla.beer.Models.Shop
         public string Notes { get; set; }
         public string ProcessedBy { get; set; }
         public string SQLResponse { get; set; }
+        public Guid EventId { get; set; }
 
         public Transaction(Guid transactionId)
         {
@@ -40,6 +41,7 @@ namespace umajkla.beer.Models.Shop
                     Updated = DateTime.Parse(reader["updated"].ToString());
                     Notes = reader["notes"].ToString();
                     ProcessedBy = reader["processedBy"].ToString();
+                    EventId = Guid.Parse(reader["eventId"].ToString());
                 }
             }
         }
@@ -68,7 +70,7 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT transactionId FROM dbo.transactions WHERE customerId='{0}'", customerId);
+                string cmdString = string.Format("SELECT transactionId FROM dbo.transactions WHERE customerId='{0}' ORDER BY Created DESC", customerId);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 List<Transaction> transactions = new List<Transaction>();
@@ -89,7 +91,30 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT transactionId FROM dbo.transactions WHERE itemId='{0}'", itemId);
+                string cmdString = string.Format("SELECT transactionId FROM dbo.transactions WHERE itemId='{0}' ORDER BY Created DESC", itemId);
+                connection.Open();
+                SqlCommand command = new SqlCommand(cmdString, connection);
+                List<Transaction> transactions = new List<Transaction>();
+                using (SqlDataReader list = command.ExecuteReader())
+                {
+                    while (list.Read())
+                    {
+                        string idString = list["transactionId"].ToString();
+                        Guid id = Guid.Parse(idString);
+                        Transaction transaction = new Transaction(id);
+                        transactions.Add(transaction);
+                    }
+                }
+
+                return transactions;
+            }
+        }
+
+        public List<Transaction> ListByEvent(Guid eventId)
+        {
+            using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                string cmdString = string.Format("SELECT transactionId FROM dbo.transactions WHERE eventId='{0}' ORDER BY Created DESC", eventId);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 List<Transaction> transactions = new List<Transaction>();
@@ -112,9 +137,9 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.transactions (customerId, itemId, amount, multiplier, notes) " +
-                "OUTPUT INSERTED.TRANSACTIONID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
-                CustomerId, ItemId, Amount, Multiplier, Notes);
+                string cmdString = string.Format("INSERT INTO dbo.transactions (customerId, itemId, amount, multiplier, notes, eventId) " +
+                "OUTPUT INSERTED.TRANSACTIONID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')",
+                CustomerId, ItemId, Amount, Multiplier, Notes, EventId);
                 connection.Open();
                 try
                 {
@@ -122,7 +147,7 @@ namespace umajkla.beer.Models.Shop
                     SQLResponse = command.ExecuteScalar().ToString();
                     return Guid.Parse(SQLResponse);
                 }
-                catch (Exception)
+                catch (FormatException)
                 {
                     return Guid.Empty;
                 }

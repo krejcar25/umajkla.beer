@@ -70,7 +70,7 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT customerId FROM dbo.customers WHERE eventId='{0}'", eventId);
+                string cmdString = string.Format("SELECT customerId FROM dbo.customers WHERE eventId='{0}' ORDER BY Name ASC", eventId);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
                 List<Customer> customers = new List<Customer>();

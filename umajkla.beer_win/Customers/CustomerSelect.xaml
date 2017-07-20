@@ -1,0 +1,31 @@
+﻿<Page x:Class="umajkla.beer_win.Customers.CustomerSelect"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:umajkla.beer_win.Customers"
+      mc:Ignorable="d" 
+      d:DesignHeight="711" d:DesignWidth="1050"
+      Title="CustomerSelect">
+    <GroupBox Margin="0" >
+        <GroupBox.Header>
+            <Run FontSize="18">Výběr zákazníka</Run>
+        </GroupBox.Header>
+        <Grid>
+            <ScrollViewer PanningMode="HorizontalOnly" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel x:Name="list1"/>
+                    <StackPanel x:Name="list2" Grid.Column="1"/>
+                    <StackPanel x:Name="list3" Grid.Column="2"/>
+
+                </Grid>
+
+            </ScrollViewer>
+        </Grid>
+    </GroupBox>
+</Page>
