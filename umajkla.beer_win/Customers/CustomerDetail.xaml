@@ -1,9 +1,9 @@
-﻿<Page x:Class="umajkla.beer_win.Customers.CustomerDetail"
+﻿<Page x:Class="beer.umajkla.win.Customers.CustomerDetail"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:umajkla.beer_win.Customers"
+      xmlns:local="clr-namespace:beer.umajkla.win.Customers"
       mc:Ignorable="d" 
       d:DesignHeight="711" d:DesignWidth="1050"
       Title="CustomerDetail">
@@ -28,7 +28,7 @@
                         <DataGridTextColumn Header="Zboží" Binding="{Binding Item.Name}" FontWeight="Bold" FontSize="18"/>
                         <DataGridTextColumn Header="Detaily" Binding="{Binding Details}" FontSize="14"/>
                         <DataGridTextColumn Header="Cena" Binding="{Binding Price}" FontSize="16" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="Datum" Binding="{Binding Transaction.Created}" FontSize="14" Width="*"/>
+                        <DataGridTextColumn Header="Datum" Binding="{Binding Transaction.Created, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}" FontSize="14" Width="*"/>
                     </DataGrid.Columns>
                     <DataGrid.RowDetailsTemplate>
                         <DataTemplate>
@@ -57,7 +57,7 @@
                 <DataGrid x:Name="paymentsGrid" Margin="10" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" Background="#CCF0F0F0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Částka" Binding="{Binding Amount}" FontWeight="Bold" FontSize="18"/>
-                        <DataGridTextColumn Header="Datum" Binding="{Binding Payment.Created}" FontSize="14" Width="*"/>
+                        <DataGridTextColumn Header="Datum" Binding="{Binding Payment.Created, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}" FontSize="14" Width="*"/>
                     </DataGrid.Columns>
                     <DataGrid.RowDetailsTemplate>
                         <DataTemplate>
@@ -147,6 +147,11 @@
                     <Button Margin="5" Click="CreatePayment_Click" TabIndex="7" Height="41">
                         <Viewbox Stretch="Uniform">
                             <TextBlock>Provést platbu</TextBlock>
+                        </Viewbox>
+                    </Button>
+                    <Button Margin="5" Click="PayAll_Click" TabIndex="7" Height="41" x:Name="PayAll">
+                        <Viewbox Stretch="Uniform">
+                            <TextBlock x:Name="payAllButtonLabel">Zaplatit vše</TextBlock>
                         </Viewbox>
                     </Button>
                     <Button Margin="5" Click="Exit_Click" TabIndex="7" Height="41">

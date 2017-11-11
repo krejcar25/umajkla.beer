@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace umajkla.beer_win.Customers
+namespace beer.umajkla.win.Customers
 {
     /// <summary>
     /// Interakční logika pro CustomerDetail.xaml
@@ -93,7 +93,10 @@ namespace umajkla.beer_win.Customers
                     balanceDisplay.Inlines.Clear();
                     balanceDisplay.Inlines.Add(run);
 
-                    deleteButton.IsEnabled = false;
+                    deleteButton.Visibility = Visibility.Collapsed;
+                    PayAll.Visibility = Visibility.Visible;
+                    PayAll.Tag = -Balance;
+                    payAllButtonLabel.Text = string.Format("Zaplatit vše ({0} Kč)", -Balance / 100);
                 }
                 else
                 {
@@ -103,7 +106,8 @@ namespace umajkla.beer_win.Customers
                     balanceDisplay.Inlines.Clear();
                     balanceDisplay.Inlines.Add(run);
 
-                    deleteButton.IsEnabled = true;
+                    deleteButton.Visibility = Visibility.Visible;
+                    PayAll.Visibility = Visibility.Collapsed;
                 }
                 createdBox.Text = "Vytvořen: " + CurrentCustomer.Created.ToString("dd.MM.yyyy hh:mm:ss");
                 updatedBox.Text = "Upraven: " + CurrentCustomer.Updated.ToString("dd.MM.yyyy hh:mm:ss");
@@ -247,6 +251,17 @@ namespace umajkla.beer_win.Customers
                 if (paid - spent > 0) MessageBox.Show(string.Format("Zákazníkovi vrátit {0} Kč kreditu", (paid - spent) / 100d), "Smazání zákazníka", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 ResetView?.Invoke(this, new EventArgs());
+            }
+        }
+
+        private void PayAll_Click(object sender, RoutedEventArgs e)
+        {
+            long toPay = (long)((Button)sender).Tag;
+            if (MessageBox.Show(string.Format("Opravdu chcete zaplatit celý účet zákazníka? Jedná se o částku {0} Kč.", toPay/100),"Nová platba", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                Payment payment = new Payment() { Amount = toPay, CustomerId = CurrentCustomer.CustomerId, EventId = Client.eventId };
+                Client.Run("payments", "POST", json: "=" + JsonConvert.SerializeObject(payment));
+                LoadDetails();
             }
         }
     }

@@ -1,57 +1,93 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using static beer.umajkla.win.AppConfig;
 
-namespace umajkla.beer_win
+namespace beer.umajkla.win
 {
     /// <summary>
     /// Interakční logika pro MainWindow.xaml
     /// </summary>
     /// 
-    
+
     public partial class MainWindow : Window
     {
-
         public MainWindow()
         {
+            LoadConfig();
+            Client.RequestWindowClose += Close;
+
             InitializeComponent();
+            charts.Visibility = Visibility.Collapsed;
+            workingOverlay.Visibility = Visibility.Collapsed;
+            keypadOverlay.Visibility = Visibility.Collapsed;
+            displayOptionsOverlay.Visibility = Visibility.Collapsed;
+
             Client.WorkStarted += Client_WorkStarted;
             Client.WorkDone += Client_WorkDone;
+            this.Refresh();
 
-            events.IsSelected = true;
+
+            LoadEvents();
         }
 
-        private void LoadWindow()
+        private void AdminLoadWindow()
         {
+            Title = "Pub U Majkla - ADMIN";
             this.Refresh();
 
             NewOrder();
             orderTab.Visibility = Visibility.Visible;
             CustomersInit();
             customers.Visibility = Visibility.Visible;
-            LoadItemEditor();
+            InitPreorder();
+            preorder.Visibility = Visibility.Visible;
 
+            LoadItemEditor();
             items.Visibility = Visibility.Visible;
             orders_payments.Visibility = Visibility.Visible;
             supplies.Visibility = Visibility.Visible;
             cashflow.Visibility = Visibility.Visible;
             stats.Visibility = Visibility.Visible;
+
             orderTab.IsSelected = true;
+        }
+
+        private void UserLoadWindow()
+        {
+            Title = "Pub U Majkla";
+            this.Refresh();
+
+            NewOrder();
+            orderTab.Visibility = Visibility.Visible;
+            CustomersInit();
+            customers.Visibility = Visibility.Visible;
+            InitPreorder();
+            preorder.Visibility = Visibility.Visible;
+
+            orderTab.IsSelected = true;
+        }
+
+        private void DisplayLoadWindow()
+        {
+            Title = "Pub U Majkla - DISPLAY";
+            this.Refresh();
+            DisplayInit();
+            tabs.Visibility = Visibility.Collapsed;
+            charts.Visibility = Visibility.Visible;
         }
 
         private void Client_WorkDone(object sender, EventArgs e)
@@ -268,7 +304,7 @@ namespace umajkla.beer_win
 
         #endregion
 
-        #region Objednávky
+        #region Výdej
         public Items.ItemSelect ItemSelect { get; set; }
         public Order.SizeSelect SizeSelect { get; set; }
         public Order.SizeSelect SaleSelect { get; set; }
@@ -320,12 +356,12 @@ namespace umajkla.beer_win
             NewOrder();
         }
 
-        private void ItemSelect_ItemSelected(object sender, Items.ItemSelectedEventArgs e)
+        private void ItemSelect_ItemSelected(object sender, Item e)
         {
             CurrentTransaction = new Transaction();
-            CurrentTransaction.ItemId = e.Item.ItemId;
+            CurrentTransaction.ItemId = e.ItemId;
 
-            SizeSelect = new Order.SizeSelect("Výběr velikosti", e.Item.Name, 500, "Velké (500ml)", 500, "Malé (300ml)", 300);
+            SizeSelect = new Order.SizeSelect("Výběr velikosti", e.Name, (int)(e.DefaultSize * 1000), e.Size1Label, (int)(e.Size1 * 1000), e.Size2Label, (int)(e.Size2 * 1000));
             SizeSelect.SizeSelected += SizeSelect_SizeSelected;
             SizeSelect.Cancelled += NewItem;
 
@@ -336,7 +372,8 @@ namespace umajkla.beer_win
         {
             CurrentTransaction.Amount = e.Size;
 
-            SaleSelect = new Order.SizeSelect("Cena", CurrentTransaction.Amount + "ml " + ItemsDic()[CurrentTransaction.ItemId], 100, "Plná cena", 100, "Sleva pro místní (60% ceny)", 60);
+            Dictionary<Guid, Item> items = ItemsDic();
+            SaleSelect = new Order.SizeSelect("Cena", CurrentTransaction.Amount / 1000d + items[CurrentTransaction.ItemId].Unit + " " + items[CurrentTransaction.ItemId], 100, "Plná cena", 100, "Sleva pro místní (60% ceny)", 60);
             SaleSelect.SizeSelected += SaleSelect_SizeSelected;
             SaleSelect.Cancelled += NewItem;
 
@@ -351,7 +388,7 @@ namespace umajkla.beer_win
 
             NewItem();
         }
-        
+
         #endregion
 
         #region Zákazníci
@@ -362,7 +399,7 @@ namespace umajkla.beer_win
 
         private void CustomersInit()
         {
-            CustomerSelectProp = new Customers.CustomerSelect(true, "Nový zákazník");
+            CustomerSelectProp = new Customers.CustomerSelect(true, "Nový zákazník", ItemsDic());
             CustomerSelectProp.CustomerSelected += CustomerSelectProp_CustomerSelected;
 
             customersViever.Content = CustomerSelectProp;
@@ -404,7 +441,118 @@ namespace umajkla.beer_win
         }
 
         #endregion
-        
+
+        #region Objednat
+
+        public Items.ItemSelect PreorderItemSelect { get; set; }
+        public Order.SizeSelect PreorderSizeSelect { get; set; }
+        public Order.SizeSelect PreorderSaleSelect { get; set; }
+        public Order.Basket PreorderBasket { get; set; }
+        public Customers.CustomerSelect PreorderCustomerSelectSale { get; set; }
+        public Transaction PreorderCurrentTransaction { get; set; }
+        public List<KeyValuePair<Customer,List<Transaction>>> PreorderList { get; set; }
+        public Order.ListOrders ListOrders { get; set; }
+
+        private void InitPreorder()
+        {
+            if (File.Exists("current_preorders.json"))
+            {
+                PreorderList = JsonConvert.DeserializeObject<List<KeyValuePair<Customer, List<Transaction>>>>(File.ReadAllText("current_preorders.json")) ?? new List<KeyValuePair<Customer, List<Transaction>>>();
+            }
+            else
+            {
+                PreorderList = new List<KeyValuePair<Customer, List<Transaction>>>();
+            }
+
+            NewPreorder();
+        }
+
+        private void NewPreorder()
+        {
+            
+            PreorderBasket = new Order.Basket(ItemsDic());
+            PreorderBasket.FinaliseOrder += PreorderBasket_FinaliseOrder;
+
+            PreorderNewItem();
+
+            preorderViewer.Content = PreorderItemSelect;
+            preorderBasketViewer.Content = PreorderBasket;
+
+            //if (!File.Exists("current_preorders.json")) File.Create("current_preorders.json");
+            File.WriteAllText("current_preorders.json", JsonConvert.SerializeObject(PreorderList, new JsonSerializerSettings() {  Formatting = Formatting.Indented }));
+        }
+
+        private void PreorderNewItem(object sender = null, EventArgs e = null)
+        {
+            PreorderItemSelect = new Items.ItemSelect(ItemsDic(), showEmpty: true, emptyLabel: "Objednávky");
+            PreorderItemSelect.ItemSelected += PreorderItemSelect_ItemSelected;
+
+            preorderViewer.Content = PreorderItemSelect;
+        }
+
+        private void PreorderBasket_FinaliseOrder(object sender, Order.FinaliseOrderEventArgs e)
+        {
+            PreorderCustomerSelectSale = new Customers.CustomerSelect(true, "Zaplatit po vydání");
+            PreorderCustomerSelectSale.CustomerSelected += PreorderCustomerSelect_CustomerSelected;
+
+            preorderViewer.Content = PreorderCustomerSelectSale;
+        }
+
+        private void PreorderCustomerSelect_CustomerSelected(object sender, Customer e)
+        {
+            PreorderList.Add(new KeyValuePair<Customer, List<Transaction>>(e, PreorderBasket.CurrentOrder));
+            NewPreorder();
+        }
+
+        private void PreorderItemSelect_ItemSelected(object sender, Item e)
+        {
+            if (e.ItemId == Guid.Empty)
+            {
+                ListOrders = new Order.ListOrders(PreorderList, ItemsDic());
+                ListOrders.newOrder.Click += NewOrder_Click;
+                preorderViewer.Content = ListOrders;
+            }
+            else
+            {
+                PreorderCurrentTransaction = new Transaction();
+                PreorderCurrentTransaction.ItemId = e.ItemId;
+
+                PreorderSizeSelect = new Order.SizeSelect("Výběr velikosti", e.Name, (int)(e.DefaultSize * 1000), e.Size1Label, (int)(e.Size1 * 1000), e.Size2Label, (int)(e.Size2 * 1000));
+                PreorderSizeSelect.SizeSelected += PreorderSizeSelect_SizeSelected;
+                PreorderSizeSelect.Cancelled += PreorderNewItem;
+
+                preorderViewer.Content = PreorderSizeSelect;
+            }
+        }
+
+        private void NewOrder_Click(object sender, RoutedEventArgs e)
+        {
+            NewPreorder();
+        }
+
+        private void PreorderSizeSelect_SizeSelected(object sender, Order.SizeSelectedEventArgs e)
+        {
+            PreorderCurrentTransaction.Amount = e.Size;
+            
+            Dictionary<Guid, Item> items = ItemsDic();
+            PreorderSaleSelect = new Order.SizeSelect("Cena", CurrentTransaction.Amount / 1000d + items[CurrentTransaction.ItemId].Unit + " " + items[CurrentTransaction.ItemId], 100, "Plná cena", 100, "Sleva pro místní (60% ceny)", 60);
+            PreorderSaleSelect.SizeSelected += PreorderSaleSelect_SizeSelected;
+            PreorderSaleSelect.Cancelled += PreorderNewItem;
+
+            preorderViewer.Content = PreorderSaleSelect;
+        }
+
+        private void PreorderSaleSelect_SizeSelected(object sender, Order.SizeSelectedEventArgs e)
+        {
+            PreorderCurrentTransaction.Multiplier = e.Size;
+
+            PreorderBasket.Add(PreorderCurrentTransaction, ItemsDic());
+
+            PreorderNewItem();
+        }
+
+        #endregion
+
         #region Transakce/Platby
 
         public List<TransactionsDisplay> TransactionsDisplayList { get; set; }
@@ -479,8 +627,9 @@ namespace umajkla.beer_win
 
         private void grid_ShowItem(object sender, RoutedEventArgs e)
         {
-            ItemSelectItems_ItemSelected(this, new Items.ItemSelectedEventArgs((Item)((Button)sender).Tag));
             items.IsSelected = true;
+            Item item = (Item)((Button)sender).Tag;
+            ItemSelectItems_ItemSelected(this, item);
         }
 
         #endregion
@@ -532,9 +681,9 @@ namespace umajkla.beer_win
             itemsViewer.Content = ItemSelectItems;
         }
 
-        private void ItemSelectItems_ItemSelected(object sender, Items.ItemSelectedEventArgs e)
+        private void ItemSelectItems_ItemSelected(object sender, Item e)
         {
-            ItemDetail = new Items.ItemDetail(e.Item);
+            ItemDetail = new Items.ItemDetail(e);
             ItemDetail.ResetView += ItemDetail_ResetView;
             ItemDetail.KeypadRequest += ItemDetail_KeypadRequest;
 
@@ -660,30 +809,7 @@ namespace umajkla.beer_win
         #region Konec
         private void CloseGo_Click(object sender, RoutedEventArgs e)
         {
-            if (File.Exists("CurrentOrder.json"))
-            {
-                string file = File.ReadAllText("CurrentOrder.json");
-                if (!string.IsNullOrEmpty(file)&&file!="[]")
-                {
-                    MessageBoxResult result = MessageBox.Show("Chcete uložit vaši aktuální objednávku?\r\n" +
-                        "Kliknutím na Ano uložíte svou objednávku a ukončíte program.\r\n" +
-                        "Kliknutím na Ne zavřete program bez uložení.\r\n" +
-                        "Kliknutím na Zrušit zrušíte zavření programu.", "Ověření", MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
-                    if (result == MessageBoxResult.No)
-                    {
-                        File.Delete("CurrentOrder.json");
-                    }
-                    else if (result == MessageBoxResult.Cancel)
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    File.Delete("CurrentOrder.json");
-                }
-            }
-            Environment.Exit(0);
+            Close();
         }
 
         private void CloseCancel_Click(object sender, RoutedEventArgs e)
@@ -699,6 +825,14 @@ namespace umajkla.beer_win
                 {
                     NewItem();
                 }
+                else if (customers.IsSelected)
+                {
+                    CustomersInit();
+                }
+                else if (preorder.IsSelected)
+                {
+                    PreorderNewItem();
+                }
                 else if (orders_payments.IsSelected)
                 {
                     LoadTransactions();
@@ -707,6 +841,10 @@ namespace umajkla.beer_win
                 else if (supplies.IsSelected)
                 {
                     LoadSupplies();
+                }
+                else if (items.IsSelected)
+                {
+                    LoadItemEditor();
                 }
                 else if (cashflow.IsSelected)
                 {
@@ -718,35 +856,279 @@ namespace umajkla.beer_win
                 }
                 else if (events.IsSelected)
                 {
-                    List<Event> events = JsonConvert.DeserializeObject<List<Event>>(Client.Run("events", "GET"));
-                    foreach (Event _event in events)
+                    LoadEvents();
+                }
+            }
+        }
+
+        private void LoadEvents()
+        {
+            string json = Client.Run("events", "GET");
+            List<Event> events = JsonConvert.DeserializeObject<List<Event>>(json);
+            foreach (Event _event in events)
+            {
+                if (_event.EventId == Guid.Empty)
+                {
+                    events.Remove(_event);
+                    break;
+                }
+            }
+            eventsGrid.ItemsSource = events;
+        }
+
+        private void SetEvent(object sender, RoutedEventArgs e)
+        {
+            CurrentConfig.EventId = (Guid)((Button)sender).Tag;
+            events.Visibility = Visibility.Collapsed;
+            string mode;
+            if (AppArgs.TryGetValue("-mode", out mode) || AppArgs.TryGetValue("/mode", out mode)) 
+            {
+                if (mode == "admin")
+                {
+                    AdminLoadWindow();
+                }
+                else if (mode == "user")
+                {
+                    UserLoadWindow();
+                }
+                else if (mode == "display")
+                {
+                    DisplayLoadWindow();
+                }
+                else
+                {
+                    MessageBox.Show("Parametr mode nebylo možné rozpoznat! Prosím spusťte program s jedním z platných hodnot parametru mode: admin, user nebo display.", "Chyba spouštění programu", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    Close();
+                }
+            }
+            else
+            {
+                /*MessageBox.Show("Parametr mode nebyl uveden! Prosím spusťte program s jedním z platných hodnot parametru mode: admin, user nebo display.", "Chyba spouštění programu", MessageBoxButton.OK, MessageBoxImage.Stop);
+                Close();*/
+                UserLoadWindow();
+            }
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            CurrentConfig.Save();
+        }
+
+        #endregion
+
+        #region Display
+
+        BackgroundWorker displayTimer = new BackgroundWorker();
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (charts.Visibility == Visibility.Visible) 
+            {
+                if (e.Key == Key.Escape && displayOptionsOverlay.Visibility == Visibility.Collapsed)
+                {
+                    Close();
+                }
+                else if ((e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) && displayOptionsOverlay.Visibility == Visibility.Visible) 
+                {
+                    displayOptionsOverlay.Visibility = Visibility.Collapsed;
+                }
+                else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+                {
+                    displayOptionsOverlay.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        private List<ItemChartDisplaySettings> ItemChartDisplaySettingList
+        {
+            get
+            {
+                List<ItemChartDisplaySettings> items = new List<ItemChartDisplaySettings>();
+                foreach (KeyValuePair<Guid,ItemChartDisplaySettings> item in CurrentConfig.DisplayItems)
+                {
+                    if (item.Key != Guid.Empty) items.Add(item.Value);
+                }
+                return items;
+            }
+            set
+            {
+                for (int i = 0; i < value.Count; i++)
+                {
+                    CurrentConfig.DisplayItems[value[i].ItemId] = value[i];
+                }
+            }
+        }
+
+        private void DisplayInit()
+        {
+            Dictionary<Guid, Item> items = ItemsDic();
+            Dictionary<Guid, ItemChartDisplaySettings> settings = CurrentConfig.DisplayItems;
+            foreach (KeyValuePair<Guid,Item> item in items)
+            {
+                if (!CurrentConfig.DisplayItems.ContainsKey(item.Value.ItemId))
+                {
+                    settings.Add(item.Value.ItemId, new ItemChartDisplaySettings());
+                    settings[item.Value.ItemId].ItemId = item.Value.ItemId;
+                    settings[item.Value.ItemId].Name = item.Value.Name;
+                    settings[item.Value.ItemId].Displayed = true;
+                }
+            }
+            CurrentConfig.DisplayItems = settings;
+
+            delay.Value = CurrentConfig.DisplayItems[Guid.Empty].Delay;
+            soldLabelText.Text = CurrentConfig.DisplayItems[Guid.Empty].SoldLabel;
+            remainsLabelText.Text = CurrentConfig.DisplayItems[Guid.Empty].RemainsLabel;
+            soldColor.SelectedColor = CurrentConfig.DisplayItems[Guid.Empty].SoldColor;
+            remainsColor.SelectedColor = CurrentConfig.DisplayItems[Guid.Empty].RemainsColor;
+            timingColor.SelectedColor = CurrentConfig.DisplayItems[Guid.Empty].ProgressBarColor;
+
+            displayOptionsList.ItemsSource = ItemChartDisplaySettingList;
+            displayTimer.WorkerReportsProgress = true;
+            displayTimer.WorkerSupportsCancellation = false;
+            displayTimer.DoWork += new DoWorkEventHandler(DisplayTimer_Loop);
+            displayTimer.ProgressChanged += new ProgressChangedEventHandler(DisplayTimer_Update);
+            displayTimer.RunWorkerAsync();
+        }
+
+        private void Charts_DoubleTap(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void DisplayTimer_Loop(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Debug.WriteLine("Starting backgroundWorker");
+            while (!worker.CancellationPending)
+            {
+                Debug.WriteLine("BackgroundWorker is running new cycle");
+                foreach (KeyValuePair<Guid,ItemChartDisplaySettings> item in CurrentConfig.DisplayItems)
+                {
+                    Debug.WriteLine("BackgroundWorker hit item " + item.Value.Name + " and ID " + item.Key);
+                    if (item.Key != Guid.Empty&&item.Value.Displayed)
                     {
-                        if (_event.EventId == Guid.Empty)
+                        worker.ReportProgress(0, item);
+                        for (int i = 0; i < item.Value.Delay; i++)
                         {
-                            events.Remove(_event);
-                            break;
+                            Debug.WriteLine(string.Format("Will sleep for {0} s", item.Value.Delay - i));
+                            worker.ReportProgress(0, i);
+                            Thread.Sleep(1000);
                         }
                     }
-                    eventsGrid.ItemsSource = events;
+                }
+            }
+        }
+
+        private void DisplayTimer_Update(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.UserState.GetType()==typeof(int))
+            {
+                if ((int)e.UserState == 0)
+                {
+                    timingCountdown.Text = string.Format("{0} s", timing.Maximum);
+                    timing.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, new DoubleAnimation(0, new TimeSpan(0, 0, 0)));
+                }
+                else
+                {
+                    timingCountdown.Text = string.Format("{0} s", timing.Maximum - (int)e.UserState + 1);
+                    timing.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, new DoubleAnimation((int)e.UserState, new TimeSpan(0, 0, 1)));
+                }
+            }
+            else
+            {
+                KeyValuePair<Guid, ItemChartDisplaySettings> item = (KeyValuePair<Guid, ItemChartDisplaySettings>)e.UserState;
+                List<Transaction> transactions = JsonConvert.DeserializeObject<List<Transaction>>(Client.Run("transactions", "GET", "item=" + item.Key.ToString()));
+                Debug.WriteLine("Transactions for query item=" + item.Key.ToString() + " were retrieved");
+                List<Supply> supplies = JsonConvert.DeserializeObject<List<Supply>>(Client.Run("supplies", "GET", "item=" + item.Key.ToString()));
+                Debug.WriteLine("Supplies for query item=" + item.Key.ToString() + " were retrieved");
+                long inStock = supplies.Sum(supply => supply.Amount);
+                long sold = transactions.Sum(transaction => transaction.Amount);
+                double ratio = 0;
+                if (inStock > 0) ratio = (double)sold / (double)inStock;
+                if (inStock > 0 && ratio == 0) ratio = 0.00000001;
+                Debug.WriteLine(string.Format("Sold: {0} of {1} ({2}%)", sold, inStock, ratio * 100));
+                timing.Foreground = new SolidColorBrush(item.Value.ProgressBarColor);
+                timing.Maximum = item.Value.Delay - 1;
+                soldLegend.Text = item.Value.SoldLabel;
+                remainsLegend.Text = item.Value.RemainsLabel;
+                displayLabel.Text = item.Value.Name;
+
+                SolidColorBrush consumedBrush = FindResource("consumedSliceForeground") as SolidColorBrush;
+                SolidColorBrush remainsBrush = FindResource("remainsSliceForeground") as SolidColorBrush;
+                ColorAnimation consumedAnim = new ColorAnimation();
+                ColorAnimation remainsAnim = new ColorAnimation();
+                consumedAnim.From = consumedBrush.Color;
+                remainsAnim.From = remainsBrush.Color;
+                consumedAnim.To = item.Value.SoldColor;
+                remainsAnim.To = item.Value.RemainsColor;
+                consumedAnim.Duration = new TimeSpan(0, 0, 1);
+                remainsAnim.Duration = new TimeSpan(0, 0, 1);
+                consumedBrush.BeginAnimation(SolidColorBrush.ColorProperty, consumedAnim);
+                remainsBrush.BeginAnimation(SolidColorBrush.ColorProperty, remainsAnim);
+                sliceConsumed.BeginAnimation(Xceed.Wpf.Toolkit.Pie.SliceProperty, new DoubleAnimation(ratio, new TimeSpan(0, 0, 1)));
+                this.Refresh();
+            }
+        }
+
+        private void setToSelected_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (KeyValuePair<Guid, ItemChartDisplaySettings> item in CurrentConfig.DisplayItems)
+            {
+                if (item.Value.BulkSelected)
+                {
+                    CurrentConfig.DisplayItems[item.Key].Delay = (int)delay.Value;
+                    CurrentConfig.DisplayItems[item.Key].SoldLabel = soldLabelText.Text;
+                    CurrentConfig.DisplayItems[item.Key].RemainsLabel = remainsLabelText.Text;
+                    CurrentConfig.DisplayItems[item.Key].SoldColor = soldColor.SelectedColor.GetValueOrDefault();
+                    CurrentConfig.DisplayItems[item.Key].RemainsColor = remainsColor.SelectedColor.GetValueOrDefault();
+                    CurrentConfig.DisplayItems[item.Key].ProgressBarColor = timingColor.SelectedColor.GetValueOrDefault();
+                }
+            }
+        }
+
+        private void setToDofault_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentConfig.DisplayItems[Guid.Empty].Delay = (int)delay.Value;
+            CurrentConfig.DisplayItems[Guid.Empty].SoldLabel = soldLabelText.Text;
+            CurrentConfig.DisplayItems[Guid.Empty].RemainsLabel = remainsLabelText.Text;
+            CurrentConfig.DisplayItems[Guid.Empty].SoldColor = soldColor.SelectedColor.GetValueOrDefault();
+            CurrentConfig.DisplayItems[Guid.Empty].RemainsColor = remainsColor.SelectedColor.GetValueOrDefault();
+            CurrentConfig.DisplayItems[Guid.Empty].ProgressBarColor = timingColor.SelectedColor.GetValueOrDefault();
+        }
+
+        private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (charts.Visibility == Visibility.Visible)
+            {
+                if (displayOptionsOverlay.Visibility == Visibility.Visible)
+                {
+                    displayOptionsOverlay.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    Close();
+                }
+            }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (charts.Visibility == Visibility.Visible)
+            {
+                if (displayOptionsOverlay.Visibility == Visibility.Collapsed)
+                {
+                    displayOptionsOverlay.Visibility = Visibility.Visible;
                 }
             }
         }
 
         #endregion
-
-        private void SetEvent(object sender, RoutedEventArgs e)
-        {
-            Client.eventId = (Guid)((Button)sender).Tag;
-            LoadWindow();
-        }
     }
 
     public static class ExtensionMethods
     {
-
         private static Action EmptyDelegate = delegate () { };
-
-
+        
         public static void Refresh(this UIElement uiElement)
         {
             uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);

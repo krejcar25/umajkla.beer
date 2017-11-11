@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace umajkla.beer_win.Payments
+namespace beer.umajkla.win.Payments
 {
     /// <summary>
     /// Interakční logika pro Keypad.xaml

@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public class RouteConfig
     {

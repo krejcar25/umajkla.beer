@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace umajkla.beer_win
+namespace beer.umajkla.win
 {
     public class Customer
     {
@@ -46,6 +46,13 @@ namespace umajkla.beer_win
         public Guid EventId { get; set; }
         public string CreatedBy { get; set; }
         public string SQLResponse { get; set; }
+        public double DisplayMultiplier { get; set; }
+        public double DefaultSize { get; set; }
+        public double Size1 { get; set; }
+        public double Size2 { get; set; }
+        public string Size1Label { get; set; }
+        public string Size2Label { get; set; }
+
 
         public override string ToString()
         {

@@ -6,8 +6,9 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.Http;
+using System.Web.Security;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public class MvcApplication : System.Web.HttpApplication
     {
@@ -18,6 +19,11 @@ namespace umajkla.beer
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        protected void Application_EndRequest()
+        {
+            var context = new HttpContextWrapper(this.Context);
         }
     }
 }

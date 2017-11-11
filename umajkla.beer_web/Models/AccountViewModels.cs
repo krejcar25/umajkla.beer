@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace umajkla.beer.Models
+namespace beer.umajkla.web.Models
 {
     public class ExternalLoginConfirmationViewModel
     {

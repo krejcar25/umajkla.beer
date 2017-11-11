@@ -7,11 +7,11 @@ using System.Windows;
 // Obecné informace o sestavení se řídí přes následující 
 // sadu atributů. Změnou hodnot těchto atributů se upraví informace
 // přidružené k sestavení.
-[assembly: AssemblyTitle("umajkla.beer")]
-[assembly: AssemblyDescription("POS klient umajkla.beer")]
+[assembly: AssemblyTitle("beer.umajkla.win")]
+[assembly: AssemblyDescription("POS klient beer.umajkla.win")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Michal Krejčí")]
-[assembly: AssemblyProduct("umajkla.beer")]
+[assembly: AssemblyProduct("beer.umajkla.win")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -51,7 +51,7 @@ using System.Windows;
 // Můžete zadat všechny hodnoty nebo nastavit výchozí číslo buildu a revize pomocí *, jak je vidět níže:
 // pomocí zástupného znaku * takto:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.9.0.0")]
+[assembly: AssemblyFileVersion("0.9.0.0")]
 [assembly: NeutralResourcesLanguage("cs")]
 

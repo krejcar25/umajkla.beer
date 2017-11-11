@@ -10,9 +10,9 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using umajkla.beer.Models;
+using beer.umajkla.web.Models;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public class EmailService : IIdentityMessageService
     {

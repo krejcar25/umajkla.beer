@@ -1,8 +1,10 @@
-﻿using Microsoft.Owin;
+﻿using System;
+using Microsoft.AspNet.Identity;
+using Microsoft.Owin;
 using Owin;
 
-[assembly: OwinStartupAttribute(typeof(umajkla.beer.Startup))]
-namespace umajkla.beer
+[assembly: OwinStartupAttribute(typeof(beer.umajkla.web.Startup))]
+namespace beer.umajkla.web
 {
     public partial class Startup
     {

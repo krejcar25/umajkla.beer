@@ -7,8 +7,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Configuration;
 using System.Web.Http;
-using umajkla.beer.Models.Shop;
-namespace umajkla.beer.Controllers
+using beer.umajkla.web.Models.Shop;
+namespace beer.umajkla.web.Controllers
 {
     public class LocationsController : ApiController
     {

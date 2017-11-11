@@ -8,9 +8,9 @@ using System.Data.SqlClient;
 using System.Web.Configuration;
 using Newtonsoft.Json;
 using System.Web.Helpers;
-using umajkla.beer.Models.Shop;
+using beer.umajkla.web.Models.Shop;
 
-namespace umajkla.beer.Controllers
+namespace beer.umajkla.web.Controllers
 {
     public class TransactionsController : ApiController
     {

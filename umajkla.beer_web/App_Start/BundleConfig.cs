@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public class BundleConfig
     {

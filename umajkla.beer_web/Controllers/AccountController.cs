@@ -8,9 +8,9 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using umajkla.beer.Models;
+using beer.umajkla.web.Models;
 
-namespace umajkla.beer.Controllers
+namespace beer.umajkla.web.Controllers
 {
     [Authorize]
     public class AccountController : Controller

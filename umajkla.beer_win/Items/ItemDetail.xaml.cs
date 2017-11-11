@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace umajkla.beer_win.Items
+namespace beer.umajkla.win.Items
 {
     /// <summary>
     /// Interakční logika pro ItemDetail.xaml

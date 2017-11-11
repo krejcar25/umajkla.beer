@@ -7,15 +7,16 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Configuration;
 using System.Web.Http;
-using umajkla.beer.Models.Shop;
+using beer.umajkla.web.Models.Shop;
 
-namespace umajkla.beer.Controllers
+namespace beer.umajkla.web.Controllers
 {
     public class EventsController : ApiController
     {
         // GET api/<controller>
         public HttpResponseMessage Get()
         {
+            
             var resp = new HttpResponseMessage();
             resp.StatusCode = HttpStatusCode.OK;
             resp.Content = new StringContent(JsonConvert.SerializeObject(new Event().List()), System.Text.Encoding.UTF8, "application/json");

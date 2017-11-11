@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.IO;
 
-namespace umajkla.beer_win.Order
+namespace beer.umajkla.win.Order
 {
     /// <summary>
     /// Interakční logika pro Basket.xaml
@@ -31,6 +31,7 @@ namespace umajkla.beer_win.Order
         public List<Transaction> CurrentOrder { get; set; }
         public Dictionary<Guid,Item> Items { get; set; }
         public long TotalPrice { get; set; }
+        public Customer CurrentCustomer { get; set; }
 
         public event FinaliseOrderEventHandler FinaliseOrder;
 
@@ -38,15 +39,8 @@ namespace umajkla.beer_win.Order
         {
             InitializeComponent();
             TotalPrice = 0;
-            if (File.Exists("CurrentOrder.json"))
-            {
-                CurrentOrder = JsonConvert.DeserializeObject<List<Transaction>>(File.ReadAllText("CurrentOrder.json"));
-            }
-            else
-            {
-                CurrentOrder = new List<Transaction>();
-            }
             Items = items;
+            CurrentOrder = new List<Transaction>();
             ListItems();
         }
 
@@ -75,7 +69,7 @@ namespace umajkla.beer_win.Order
                 itemName.FontWeight = FontWeights.Bold;
                 itemName.FontSize = 20;
 
-                Run volume = new Run(string.Format("     {0}ml", transaction.Amount));
+                Run volume = new Run(string.Format("     {0}{1}", transaction.Amount / 1000, Items[transaction.ItemId].Unit));
                 volume.FontSize = 16;
 
                 long price = (transaction.Amount * Items[transaction.ItemId].Price * transaction.Multiplier) / 100000L;
@@ -120,8 +114,6 @@ namespace umajkla.beer_win.Order
                 transaction.EventId = Guid.Parse("99662CCC-A951-4EB9-9FBF-73EB9992C4AE");
                 Client.Run("transactions", "POST", "", string.Format("={0}", JsonConvert.SerializeObject(transaction)));
             }
-
-            File.Delete("CurrentOrder.json");
         }
 
         public void PayNow()
@@ -145,8 +137,12 @@ namespace umajkla.beer_win.Order
 
             payment.Notes = notes;
             Client.Run("payments", "PUT", "", string.Format("={0}", JsonConvert.SerializeObject(payment)));
+        }
 
-            File.Delete("CurrentOrder.json");
+        public Basket Store(Customer customer)
+        {
+            CurrentCustomer = customer;
+            return this;
         }
     }
 }

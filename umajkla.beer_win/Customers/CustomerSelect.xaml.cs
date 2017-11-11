@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace umajkla.beer_win.Customers
+namespace beer.umajkla.win.Customers
 {
     /// <summary>
     /// Interakční logika pro CustomerSelect.xaml
@@ -24,23 +24,13 @@ namespace umajkla.beer_win.Customers
 
     public delegate void CustomerSelectedEventhandler(object sender, Customer e);
 
-    public class CustomerSelectedEventArgs : EventArgs
-    {
-        public Customer Customer { get; set; }
-
-        public CustomerSelectedEventArgs(Customer customer)
-        {
-            Customer = customer;
-        }
-    }
-
     public partial class CustomerSelect : Page
     {
         public event CustomerSelectedEventhandler CustomerSelected;
 
         public Dictionary<Guid,Customer> Customers { get; set; }
 
-        public CustomerSelect(bool showEmpty = false, string emptyMessage = "")
+        public CustomerSelect(bool showEmpty = false, string emptyMessage = "", Dictionary<Guid,Item> items = null)
         {
             InitializeComponent();
             ListCustomers();
@@ -74,8 +64,28 @@ namespace umajkla.beer_win.Customers
                 Viewbox box = new Viewbox();
                 TextBlock block = new TextBlock();
 
-                block.Text = customer.Value.Name;
-                block.FontWeight = FontWeights.Bold;
+                block.Inlines.Add(new Run(customer.Value.Name) { FontWeight = FontWeights.Bold });
+                if (showEmpty && emptyMessage == "Nový zákazník")
+                {
+                    List<Transaction> transactions = JsonConvert.DeserializeObject<List<Transaction>>(Client.Run("transactions", "GET", string.Format("customer={0}", customer.Value.CustomerId)));
+                    List<Payment> payments = JsonConvert.DeserializeObject<List<Payment>>(Client.Run("payments", "GET", string.Format("customer={0}", customer.Value.CustomerId)));
+                    long spent = 0;
+                    foreach (Transaction transaction in transactions)
+                    {
+                        spent += transaction.Amount * items[transaction.ItemId].Price * transaction.Multiplier / 100000;
+                    }
+                    long balance = payments.Sum(payment => payment.Amount) - spent;
+                    block.Inlines.Add(new Run(" ("));
+                    if (balance < 0)
+                    {
+                        block.Inlines.Add(new Run(string.Format("{0} Kč", -Math.Round(balance / 100d, 0))) { Foreground = new SolidColorBrush(Colors.Red) });
+                    }
+                    else
+                    {
+                        block.Inlines.Add(new Run(string.Format("{0} Kč", Math.Round(balance / 100d, 0))));
+                    }
+                    block.Inlines.Add(new Run(")"));
+                }
 
                 box.Stretch = Stretch.Uniform;
                 box.Child = block;

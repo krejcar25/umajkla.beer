@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace umajkla.beer_win.Order
+namespace beer.umajkla.win.Order
 {
     /// <summary>
     /// Interakční logika pro SizeSelect.xaml

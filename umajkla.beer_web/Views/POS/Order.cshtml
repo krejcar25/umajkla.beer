@@ -1,0 +1,21 @@
+﻿@using beer.umajkla.web.Models.Shop;
+@using using System.Web.Script.Serialization;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>Objednat</h2>
+<h3>Vytvoření nové objednávky</h3>
+
+@if ((bool)ViewData["canOrder"])
+{
+    @foreach (Item item in (List<Item>)ViewData["items"])
+    {
+        @
+    }
+}
+else
+{
+    
+}

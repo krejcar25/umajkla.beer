@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Configuration;
 
-namespace umajkla.beer.Models.Shop
+namespace beer.umajkla.web.Models.Shop
 {
     public class Customer
     {

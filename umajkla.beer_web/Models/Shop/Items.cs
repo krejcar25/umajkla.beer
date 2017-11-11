@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Configuration;
 
-namespace umajkla.beer.Models.Shop
+namespace beer.umajkla.web.Models.Shop
 {
 	public class Item
     {
@@ -19,6 +19,12 @@ namespace umajkla.beer.Models.Shop
         public Guid EventId { get; set; }
         public string CreatedBy { get; set; }
         public string SQLResponse { get; set; }
+        public double DisplayMultiplier { get; set; }
+        public double DefaultSize { get; set; }
+        public double Size1 { get; set; }
+        public double Size2 { get; set; }
+        public string Size1Label { get; set; }
+        public string Size2Label { get; set; }
 
         public Item(Guid itemId)
         {
@@ -39,6 +45,12 @@ namespace umajkla.beer.Models.Shop
                     Notes = reader["notes"].ToString();
                     EventId = Guid.Parse(reader["eventId"].ToString());
                     CreatedBy = reader["createdBy"].ToString();
+                    DisplayMultiplier = double.Parse(reader["displayMultiplier"].ToString());
+                    DefaultSize = double.Parse(reader["defaultSize"].ToString());
+                    Size1 = double.Parse(reader["size1"].ToString());
+                    Size2 = double.Parse(reader["size2"].ToString());
+                    Size1Label = reader["size1label"].ToString();
+                    Size2Label = reader["size2label"].ToString();
                 }
             }
         }
@@ -86,9 +98,9 @@ namespace umajkla.beer.Models.Shop
         {
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("INSERT INTO dbo.items (name, price, unit, notes, eventId) " +
-                "OUTPUT INSERTED.ITEMID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')",
-                Name, Price, Unit, Notes, EventId);
+                string cmdString = string.Format("INSERT INTO dbo.items (name, price, unit, notes, eventId, displayMultiplier, defaultSize, size1, size2, size1label, size2label) " +
+                "OUTPUT INSERTED.ITEMID VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}')",
+                Name, Price, Unit, Notes, EventId, DisplayMultiplier, DefaultSize, Size1, Size2, Size1Label, Size2Label);
                 connection.Open();
                 try
                 {
@@ -108,8 +120,8 @@ namespace umajkla.beer.Models.Shop
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 string cmdString = string.Format("UPDATE dbo.items SET " +
-                    "name='{0}', price='{1}', unit='{2}', notes='{3}', updated='{4}', eventId='{5}' OUTPUT INSERTED.ITEMID WHERE itemId='{6}'",
-                    Name, Price, Unit, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId, ItemId);
+                    "name='{0}', price='{1}', unit='{2}', notes='{3}', updated='{4}', eventId='{5}', displayMultiplier='{6}', defaultSize='{7}', size1='{8}', size2='{9}', size1label='{10}', size2label='{11}' OUTPUT INSERTED.ITEMID WHERE itemId='{12}'",
+                    Name, Price, Unit, Notes, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), EventId, DisplayMultiplier, DefaultSize, Size1, Size2, Size1Label, Size2Label, ItemId);
                 connection.Open();
                 try
                 {

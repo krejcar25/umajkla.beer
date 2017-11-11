@@ -5,9 +5,9 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Owin;
-using umajkla.beer.Models;
+using beer.umajkla.web.Models;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public partial class Startup
     {

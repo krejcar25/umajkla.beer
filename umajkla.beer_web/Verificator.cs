@@ -7,11 +7,30 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Configuration;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
-namespace umajkla.beer
+namespace beer.umajkla.web
 {
     public class Verificator
     {
+        public struct VerifiedData
+        {
+            public string userId { get; set; }
+            public string checksum { get; set; }
+            public string encryptedData { get; set; }
+        }
+
+        public static string Encrypt(string controller, string method, string userId, object result, string publicKey)
+        {
+            string serialised = "";
+            using (MemoryStream stream = new MemoryStream())
+            {
+                new BinaryFormatter().Serialize(stream, result);
+                serialised = Convert.ToBase64String(stream.ToArray());
+            }
+            return serialised;
+        }
         public static string Encrypt(string json, string userId, Guid keyId)
         {
             DateTime verifyDate = DateTime.UtcNow.Date.AddHours(DateTime.UtcNow.Hour);
@@ -46,54 +65,52 @@ namespace umajkla.beer
         /// 1 = Expired
         /// 2 = Invalid
         /// 3 = Key not found</returns>
-        private static int Decrypt(string json)
+        private static int Decrypt(string json, string userid, string date, string clientHash)
         {
             DateTime verifyDate = DateTime.UtcNow.Date.AddHours(DateTime.UtcNow.Hour);
             dynamic data = System.Web.Helpers.Json.Decode(json);
 
-            if (DateTime.Parse(data.security.date) != verifyDate)
+            if (date != verifyDate.ToString("yyyy-MM-dd HH:mm:ss"))
             {
                 return 1;
             }
 
-            string keyPhrase;
+            string dbKeyPhrase;
 
             using (SqlConnection connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
-                string cmdString = string.Format("SELECT keyPhrase FROM dbo.APIkeys WHERE userId = '{0}' and keyId = '{1}'", data.security.userId, data.security.keyId);
+                string cmdString = string.Format("SELECT keyPhrase FROM dbo.APIkeys WHERE userId = '{0}'", userid);
                 connection.Open();
                 SqlCommand command = new SqlCommand(cmdString, connection);
-                keyPhrase = command.ExecuteScalar().ToString();
+                if (command.ExecuteNonQuery() == 0) return 3;
+                dbKeyPhrase = command.ExecuteScalar().ToString();
             }
 
-            string raw = string.Format("I hereby send the json {0} as user {1}'s app {2} authenticated by code {3} as of the date {4}", System.Web.Helpers.Json.Encode(data.data), data.security.userId, data.security.keyId, keyPhrase, verifyDate);
+            string raw = string.Format("I hereby send the json {0} as user {1} authenticated by code {2} as of the date {3}", json, userid, dbKeyPhrase, verifyDate);
             byte[] rawEnc = new UTF8Encoding().GetBytes(raw);
-            byte[] hashEnc = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(rawEnc);
+            byte[] hashEnc = ((HashAlgorithm)CryptoConfig.CreateFromName("SHA512")).ComputeHash(rawEnc);
             string hash = BitConverter.ToString(hashEnc).Replace("-", string.Empty).ToLower();
 
-            if (hash != data.security.hash)
-            {
-                return 2;
-            }
+            if (hash != clientHash) return 2;
 
-            return 1;
+            return 0;
         }
 
         public static int IsAllowed(string details, string controller, string task, string id)
         {
             dynamic data = System.Web.Helpers.Json.Decode(details);
-            int requestValid;
+            int requestValid = 0;
             try
             {
                 dynamic testdata = data.data;
-                requestValid = Decrypt(details);
+                //requestValid = Decrypt(details);
             }
             catch (RuntimeBinderException)
             {
                 data.data.controller = controller;
                 data.data.task = task;
                 data.data.id = id;
-                requestValid = Decrypt(System.Web.Helpers.Json.Encode(data));
+                //requestValid = Decrypt(System.Web.Helpers.Json.Encode(data));
             }
 
             if (requestValid == 0)

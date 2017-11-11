@@ -19,31 +19,21 @@ using System.Net;
 using System.IO;
 using System.Collections.ObjectModel;
 
-namespace umajkla.beer_win.Items
+namespace beer.umajkla.win.Items
 {
     /// <summary>
     /// Interakční logika pro ItemSelect.xaml
     /// </summary>
     /// 
 
-    public delegate void ItemSelectedEventHandler(object sender, ItemSelectedEventArgs e);
-    
-    public class ItemSelectedEventArgs : EventArgs
-    {
-        public Item Item { get; set; }
-
-        public ItemSelectedEventArgs(Item item)
-        {
-            Item = item;
-        }
-    }
+    public delegate void ItemSelectedEventHandler(object sender, Item e);
 
     public partial class ItemSelect : Page
     {
         public event ItemSelectedEventHandler ItemSelected;
         public Dictionary<Guid,Item> Items { get; set; }
 
-        public ItemSelect(Dictionary<Guid,Item> items, bool showEmpty = false, bool onlyInStock = true) 
+        public ItemSelect(Dictionary<Guid,Item> items, bool showEmpty = false, bool onlyInStock = true, string emptyLabel = "Nové zboží") 
         { 
             InitializeComponent();
 
@@ -57,7 +47,7 @@ namespace umajkla.beer_win.Items
                 Viewbox box = new Viewbox();
                 TextBlock block = new TextBlock();
 
-                block.Text = "Nové zboží";
+                block.Text = emptyLabel;
                 block.FontWeight = FontWeights.Bold;
 
                 box.Stretch = Stretch.Uniform;
@@ -108,29 +98,25 @@ namespace umajkla.beer_win.Items
                 button.Height = 80;
                 button.Margin = new Thickness(10);
 
-                if (onlyInStock && amount <= 0)
+                if ((onlyInStock && amount > 0) || !onlyInStock) 
                 {
-                    return;
-                }
-
-                if (column == 1)
-                {
-                    list1.Children.Add(button);
-                    column = 2;
-                }
-                else if (column == 2)
-                {
-                    list2.Children.Add(button);
-                    column = 3;
-                }
-                else
-                {
-                    list3.Children.Add(button);
-                    column = 1;
+                    if (column == 1)
+                    {
+                        list1.Children.Add(button);
+                        column = 2;
+                    }
+                    else if (column == 2)
+                    {
+                        list2.Children.Add(button);
+                        column = 3;
+                    }
+                    else
+                    {
+                        list3.Children.Add(button);
+                        column = 1;
+                    }
                 }
             }
-
-
         }
 
         private void itemButton_Click(object sender, RoutedEventArgs e)
@@ -138,11 +124,11 @@ namespace umajkla.beer_win.Items
             Guid id = Guid.Parse(((Button)sender).Tag.ToString());
             if (id == Guid.Empty)
             {
-                ItemSelected?.Invoke(this, new ItemSelectedEventArgs(new Item()));
+                ItemSelected?.Invoke(this, new Item());
             }
             else
             {
-                ItemSelected?.Invoke(this, new ItemSelectedEventArgs(Items[id]));
+                ItemSelected?.Invoke(this, Items[id]);
             }
         }
     }

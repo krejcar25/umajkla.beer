@@ -1,0 +1,18 @@
+﻿@using beer.umajkla.web.Models.Shop;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Event> events = new Event().List();
+}
+
+<h2>Prodej</h2>
+<h3>Vyberte událost</h3><br/>
+<table>
+    @foreach (Event _event in events)
+    {
+        <tr>
+            <th>@_event.Name</th>
+            <td><a href="/POS/Order/@_event.EventId">Objednat</a></td>
+            <td><a href="/POS/Payment/@_event.EventId">Zaplatit</a></td>
+        </tr>
+    }
+</table>

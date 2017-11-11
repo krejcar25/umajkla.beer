@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
 
-namespace umajkla.beer.Models
+namespace beer.umajkla.web.Models
 {
     public class IndexViewModel
     {

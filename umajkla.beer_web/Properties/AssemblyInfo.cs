@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Obecné informace o sestavení jsou řízeny prostřednictvím následující
 // sady atributů. Chcete-li změnit informace související se sestavením,
 // změňte hodnoty těchto atributů.
-[assembly: AssemblyTitle("umajkla.beer")]
+[assembly: AssemblyTitle("beer.umajkla.web")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("umajkla.beer")]
+[assembly: AssemblyProduct("beer.umajkla.web")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
