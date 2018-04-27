@@ -1,0 +1,20 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h1>Registrace aplikace</h1>
+@if (ViewBag.Success)
+{
+    <h3>QR kód pro snadné připojení</h3>
+    @ViewBag.QR
+    <h3>Přihlašovací údaje</h3>
+    <p>Pokud nemáte možnost načíst QR kód, nebo se jeho načtení nedaří, zadejte následující údaje:</p>
+    <p>Uživatelské jméno: @ViewBag.Username</p>
+    <p>API Token: @ViewBag.Token</p>
+    <p>API Secret: @ViewBag.Secret</p>
+}
+else
+{
+    <h3>Generování tokenu selhalo. Zkuste akci opakovat později nebo kontaktujte správce.</h3>
+}

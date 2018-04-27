@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a59f44cf-0635-4e96-9ba8-32026e817bd4</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>beer.umajkla</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Customer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\IShopObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Item.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Location.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Payment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Supply.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Transastion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\VerifiedData.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)ShopModel\" />
+  </ItemGroup>
+</Project>

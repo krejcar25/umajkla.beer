@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<SolutionLoadInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ActiveProfileName>&lt;Active Profile&gt;</ActiveProfileName>
+  <Profiles>
+    <SolutionLoadProfile>
+      <ProfileName>&lt;Active Profile&gt;</ProfileName>
+      <Projects>
+        <ProjectLoadInfo>
+          <ProjectGuid>32338811-5e24-49fc-a68e-5b5907bc5a8d</ProjectGuid>
+          <LoadPriority>ExplicitLoadOnly</LoadPriority>
+        </ProjectLoadInfo>
+        <ProjectLoadInfo>
+          <ProjectGuid>a4112866-6a79-4e9a-b030-ed8ddc11700c</ProjectGuid>
+          <LoadPriority>DemandLoad</LoadPriority>
+        </ProjectLoadInfo>
+        <ProjectLoadInfo>
+          <ProjectGuid>1dd49e7a-6df7-4027-867f-507ba8615fa7</ProjectGuid>
+          <LoadPriority>DemandLoad</LoadPriority>
+        </ProjectLoadInfo>
+        <ProjectLoadInfo>
+          <ProjectGuid>aabaae0a-b2c8-48c1-a0f8-e076e903718c</ProjectGuid>
+          <LoadPriority>LoadIfNeeded</LoadPriority>
+        </ProjectLoadInfo>
+        <ProjectLoadInfo>
+          <ProjectGuid>4b9b37a7-0dca-4bf7-9421-95cec166498a</ProjectGuid>
+          <LoadPriority>ExplicitLoadOnly</LoadPriority>
+        </ProjectLoadInfo>
+        <ProjectLoadInfo>
+          <ProjectGuid>024b415f-70c9-43c8-a8b8-d7f7cd623b4e</ProjectGuid>
+          <LoadPriority>ExplicitLoadOnly</LoadPriority>
+        </ProjectLoadInfo>
+      </Projects>
+    </SolutionLoadProfile>
+  </Profiles>
+</SolutionLoadInfo>
