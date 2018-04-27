@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="a8f4b105-0d13-4371-acb1-7f9a3928aab3"
+    Name="96476974-e643-417c-912e-c0e5756e3ec8"
     Publisher="CN=michal.krejci"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="a8f4b105-0d13-4371-acb1-7f9a3928aab3" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="96476974-e643-417c-912e-c0e5756e3ec8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>beer.umajkla.client.UWP</DisplayName>
@@ -26,7 +26,7 @@
   <Resources>
     <Resource Language="x-generate"/>
   </Resources>
-  
+
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"

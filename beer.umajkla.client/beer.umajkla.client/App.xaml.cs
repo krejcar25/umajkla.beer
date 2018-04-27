@@ -1,9 +1,10 @@
-﻿using beer.umajkla.client.Views;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
-[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace beer.umajkla.client
 {
     public partial class App : Application
@@ -12,27 +13,22 @@ namespace beer.umajkla.client
         {
             InitializeComponent();
 
-            SetMainPage();
+            MainPage = new LoginPage();
         }
 
-        public static void SetMainPage()
+        protected override void OnStart()
         {
-            Current.MainPage = new TabbedPage
-            {
-                Children =
-                {
-                    new NavigationPage(new ItemsPage())
-                    {
-                        Title = "Browse",
-                        Icon = Device.OnPlatform("tab_feed.png",null,null)
-                    },
-                    new NavigationPage(new AboutPage())
-                    {
-                        Title = "About",
-                        Icon = Device.OnPlatform("tab_about.png",null,null)
-                    },
-                }
-            };
+            // Handle when your app starts
+        }
+
+        protected override void OnSleep()
+        {
+            // Handle when your app sleeps
+        }
+
+        protected override void OnResume()
+        {
+            // Handle when your app resumes
         }
     }
 }
