@@ -13,7 +13,7 @@ namespace beer.umajkla.web.Controllers
 {
     public class SuppliesController : ApiController
     {
-        // GET api/<controller>/5
+        // GET api/<controller>
         public HttpResponseMessage Get()
         {
             VerifiedData<NoDataRequest> verifiedData;
