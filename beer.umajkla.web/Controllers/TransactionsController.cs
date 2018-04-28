@@ -118,7 +118,7 @@ namespace beer.umajkla.web.Controllers
                     }
                 }
             };
-            return verifiedData.GetResponseMessage(action, ControllerName.Supplies, NoDataTask.Delete);
+            return verifiedData.GetResponseMessage(action, ControllerName.Transactions, NoDataTask.Delete);
         }
     }
 }
