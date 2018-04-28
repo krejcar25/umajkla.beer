@@ -70,7 +70,7 @@ namespace beer.umajkla.web.Controllers
             });
         }
 
-        // PUT api/<controller>/5
+        // PUT api/<controller>
         public HttpResponseMessage Put([FromBody]string json)
         {
             VerifiedData<Supply> verifiedData = JsonConvert.DeserializeObject<VerifiedData<Supply>>(json);
