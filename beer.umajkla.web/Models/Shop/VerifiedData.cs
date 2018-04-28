@@ -10,7 +10,7 @@ using System.Web.Configuration;
 
 namespace beer.umajkla.ShopModel
 {
-    public partial class VerifiedData<TData> : IRequestValidityProvider<TData> where TData : IShopObject
+    public partial class VerifiedData<TData> where TData : IShopObject
     {
         public ValidityCheckResult IsRequestValid()
         {

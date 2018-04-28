@@ -223,7 +223,6 @@
     <Compile Include="Crypto.cs" />
     <Compile Include="Models\Shop\Customer.cs" />
     <Compile Include="Models\Shop\Event.cs" />
-    <Compile Include="Models\Shop\IRequestValidityProvider.cs" />
     <Compile Include="Models\Shop\IShopObject.cs" />
     <Compile Include="Models\Shop\Item.cs" />
     <Compile Include="Models\Shop\Location.cs" />
