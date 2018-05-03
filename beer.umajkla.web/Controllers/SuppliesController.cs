@@ -90,7 +90,7 @@ namespace beer.umajkla.web.Controllers
             });
         }
 
-        // DELETE api/<controller>/5
+        // DELETE api/<controller>
         public HttpResponseMessage Delete([FromBody]string json)
         {
             VerifiedData<NoDataRequest> verifiedData = JsonConvert.DeserializeObject<VerifiedData<NoDataRequest>>(json);
