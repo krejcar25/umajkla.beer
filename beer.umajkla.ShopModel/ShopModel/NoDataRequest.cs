@@ -27,7 +27,20 @@ namespace beer.umajkla.ShopModel
 
     public enum ControllerName
     {
-        Customers, Events, Items, Locations, Payments, Supplies, Transactions
+        [ApiAddress("customers")]
+        Customers,
+        [ApiAddress("events")]
+        Events,
+        [ApiAddress("items")]
+        Items,
+        [ApiAddress("locations")]
+        Locations,
+        [ApiAddress("payments")]
+        Payments,
+        [ApiAddress("supplies")]
+        Supplies,
+        [ApiAddress("transactions")]
+        Transactions
     }
 
     public enum NoDataTask

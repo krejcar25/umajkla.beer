@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)APIkey.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Customer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShopModel\LoginData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShopModel\NoDataRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShopModel\IShopObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShopModel\Item.cs" />

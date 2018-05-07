@@ -82,5 +82,40 @@ namespace beer.umajkla.ShopModel
             //If we have no description attribute, just return the ToString of the enum
             return enumerationValue.ToString();
         }
+
+        public static string GetApiAddress<T>(this T enumerationValue) where T : struct
+        {
+            Type type = enumerationValue.GetType();
+            if (!type.IsEnum)
+            {
+                throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
+            }
+
+            //Tries to find a DescriptionAttribute for a potential friendly name
+            //for the enum
+            MemberInfo[] memberInfo = type.GetMember(enumerationValue.ToString());
+            if (memberInfo != null && memberInfo.Length > 0)
+            {
+                object[] attrs = memberInfo[0].GetCustomAttributes(typeof(ApiAddressAttribute), false);
+
+                if (attrs != null && attrs.Length > 0)
+                {
+                    //Pull out the description value
+                    return ((ApiAddressAttribute)attrs[0]).ApiAddress;
+                }
+            }
+            //If we have no description attribute, just return the ToString of the enum
+            return enumerationValue.ToString();
+        }
+    }
+
+    public class ApiAddressAttribute : Attribute
+    {
+        public string ApiAddress { get; set; }
+
+        public ApiAddressAttribute(string address)
+        {
+            ApiAddress = address;
+        }
     }
 }
